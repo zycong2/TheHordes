@@ -1,0 +1,6 @@
+name: TheHordes
+version: '1.0'
+main: org.zycong.theHordes.TheHordes
+api-version: '1.20'
+authors: [ zycong ]
+description: Dungeon generator plugin
