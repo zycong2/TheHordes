@@ -9,12 +9,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.zycong.theHordes.helpers.ColorUtils;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.DefensePlaceholder;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.ManaPlaceholder;
+import org.zycong.theHordes.helpers.commandHelper.CommandManager;
+import org.zycong.theHordes.helpers.yaml.yamlManager;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class TheHordes extends JavaPlugin {
 
-    public static List<String> yamlFiles = List.of("data", "messages", "mobDB", "config", "lootTables", "skills", "quests", "format");
+    public static List<String> yamlFiles = List.of("data", "messages");
     public static List<YamlConfiguration> fileConfigurationList = new java.util.ArrayList<>(List.of());
 
     public static boolean IsLuckperms = false;
@@ -22,17 +26,24 @@ public final class TheHordes extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        Logger reflectionsLogger = Logger.getLogger("org.reflections");
+        reflectionsLogger.setLevel(Level.OFF);
+
+        yamlManager.getInstance().loadData();
         if(doesPluginExist("LuckPerms")){IsLuckperms = true;}
         if(doesPluginExist("PlaceholderAPI")){IsPlaceholderAPI = true;
             new DefensePlaceholder().register();
             new ManaPlaceholder().register();
         }
+        this.getCommand("TheHordes").setExecutor(new CommandManager());
+        this.getCommand("TheHordes").setTabCompleter(new CommandManager());
+
 
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        yamlManager.getInstance().saveData();
     }
 
     public static Plugin getPlugin() { return Bukkit.getServer().getPluginManager().getPlugin("TheHordes"); }

@@ -59,16 +59,22 @@ public class yamlManager {
                 getFileConfig(config) ;
                 int index = 0;
                 for (String s : TheHordes.yamlFiles) {
-                    if (Objects.equals(s, config)) {break;}index++;}
-                TheHordes.fileConfigurationList.set(index, YamlConfiguration.loadConfiguration(cfile));}
-            else {return defaultConfig();}}
+                    if (Objects.equals(s, config)) {break;}
+                    index++;
+                }
+                TheHordes.fileConfigurationList.set(index, YamlConfiguration.loadConfiguration(cfile));
+            }
+        }
+        defaultConfig();
         return true;
     }
 
     public YamlConfiguration getFileConfig(String ymlFile) {
         int index = 0;
         for (String s : TheHordes.yamlFiles) {
-            if (Objects.equals(s, ymlFile)) { return TheHordes.fileConfigurationList.get(index); }
+            if (Objects.equals(s, ymlFile)) {
+                return TheHordes.fileConfigurationList.get(index);
+            }
             index++;
         }
         return null;
@@ -79,10 +85,6 @@ public class yamlManager {
     public Object getOption(String file, String path){
         if (getFileConfig(file).get(path) == null){ return null; }
         Object data = getFileConfig(file).get(path);
-        if (data instanceof String){
-            data = TheHordes.Colorize(data.toString());
-
-        }
         return data;
     }
 
@@ -92,7 +94,9 @@ public class yamlManager {
     }
     public boolean setDefaults() {
         if (getFileConfig("messages").getDefaults() == null) {
-            getFileConfig("messages").addDefault("command.failed.noArgs", "&c");
+            getFileConfig("messages").addDefault("command.failed.noArgs", "&cPlease specify arguments");
+            getFileConfig("messages").addDefault("command.failed.noPermission", "&cYou don't have permission for this command!");
+            getFileConfig("messages").options().copyDefaults(true);
         }
         return true;
     }

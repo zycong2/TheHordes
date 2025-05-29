@@ -4,3 +4,10 @@ main: org.zycong.theHordes.TheHordes
 api-version: '1.20'
 authors: [ zycong ]
 description: Dungeon generator plugin
+
+commands:
+  TheHordes:
+    description: Manage TheHordes plugin
+    permission: TheHordes.commands
+    aliases:
+      - th
