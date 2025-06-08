@@ -4,6 +4,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.zycong.theHordes.helpers.ColorUtils;
@@ -12,14 +13,24 @@ import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.ManaPlaceholder;
 import org.zycong.theHordes.helpers.commandHelper.CommandManager;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class TheHordes extends JavaPlugin {
 
-    public static List<String> yamlFiles = List.of("data", "messages");
+    public static List<String> yamlFiles = List.of("data", "messages", "config", "teams");
     public static List<YamlConfiguration> fileConfigurationList = new java.util.ArrayList<>(List.of());
+
+    public static Map<String, YamlConfiguration> ItemDB = new HashMap<>();
+
+    public static List<LivingEntity> customMobs = new java.util.ArrayList<>(List.of());
+    public static List<String> spawns = new java.util.ArrayList<>(List.of());
+
+    public static List<String> DBFolders = List.of("itemDB", "mobDB", "GUI");
+    public static Map<String, List<YamlConfiguration>> DBFileConfiguration = new HashMap<>();
 
     public static boolean IsLuckperms = false;
     public static boolean IsPlaceholderAPI = false;
@@ -50,8 +61,7 @@ public final class TheHordes extends JavaPlugin {
 
     public static TextComponent Colorize(String input){
         String s = FormatForMiniMessage(input);
-        TextComponent deserialized = (TextComponent) MiniMessage.miniMessage().deserialize(s);
-        return deserialized;
+        return (TextComponent) MiniMessage.miniMessage().deserialize(s);
     }
 
     public static String FormatForMiniMessage(String input){
