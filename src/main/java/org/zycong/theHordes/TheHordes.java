@@ -50,6 +50,8 @@ public final class TheHordes extends JavaPlugin {
         reflectionsLogger.setLevel(Level.OFF);
 
         yamlManager.getInstance().loadData();
+        lobbyManager.startTimers();
+
         if(doesPluginExist("LuckPerms")){IsLuckperms = true;}
         if(doesPluginExist("PlaceholderAPI")){IsPlaceholderAPI = true;
             new DefensePlaceholder().register();
