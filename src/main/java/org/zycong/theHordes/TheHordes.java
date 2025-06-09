@@ -5,14 +5,19 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.zycong.theHordes.event.player.interaction;
+import org.zycong.theHordes.event.player.playerConnect;
 import org.zycong.theHordes.helpers.ColorUtils;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.DefensePlaceholder;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.ManaPlaceholder;
 import org.zycong.theHordes.helpers.commandHelper.CommandManager;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
+import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +26,7 @@ import java.util.logging.Logger;
 
 public final class TheHordes extends JavaPlugin {
 
-    public static List<String> yamlFiles = List.of("data", "messages", "config", "teams");
+    public static List<String> yamlFiles = List.of("data", "messages", "config", "lobbies");
     public static List<YamlConfiguration> fileConfigurationList = new java.util.ArrayList<>(List.of());
 
     public static Map<String, YamlConfiguration> ItemDB = new HashMap<>();
@@ -46,6 +51,11 @@ public final class TheHordes extends JavaPlugin {
             new DefensePlaceholder().register();
             new ManaPlaceholder().register();
         }
+        registerListeners(
+            new interaction(),
+            new playerConnect()
+        );
+
         this.getCommand("TheHordes").setExecutor(new CommandManager());
         this.getCommand("TheHordes").setTabCompleter(new CommandManager());
 
@@ -55,6 +65,7 @@ public final class TheHordes extends JavaPlugin {
     @Override
     public void onDisable() {
         yamlManager.getInstance().saveData();
+        lobbyManager.clearLobbies();
     }
 
     public static Plugin getPlugin() { return Bukkit.getServer().getPluginManager().getPlugin("TheHordes"); }
@@ -95,5 +106,9 @@ public final class TheHordes extends JavaPlugin {
     }
     public static String ColorizeReString(String input) {
         return ColorUtils.colorize(input, '&');
+    }
+
+    private void registerListeners(Listener... l) {
+        Arrays.asList(l).forEach(I-> getServer().getPluginManager().registerEvents(I, this));
     }
 }

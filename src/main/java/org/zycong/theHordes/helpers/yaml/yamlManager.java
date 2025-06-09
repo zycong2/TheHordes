@@ -137,12 +137,17 @@ public class yamlManager {
 
             getFileConfig("messages").addDefault("command.success.spawn.set", "&aSuccessfully set the new spawn!");
             getFileConfig("messages").addDefault("command.success.spawn.tp", "&aSuccessfully teleported to spawn!");
+            getFileConfig("messages").addDefault("command.success.lobbies.create", "&aSuccessfully made the new lobby at your location!");
+
+            getFileConfig("messages").addDefault("event.success.addedToLobby", "&aYou successfully joined a lobby!");
             getFileConfig("messages").options().copyDefaults(true);
         }
 
         if (getFileConfig("config").getDefaults() == null) {
             Location loc = new Location(Bukkit.getWorld("world"), 0, 100, 0);
             getFileConfig("config").addDefault("spawn.location", loc);
+
+            getFileConfig("config").addDefault("lobbies.waitingTime", 30);
             getFileConfig("config").options().copyDefaults(true);
         }
         return true;

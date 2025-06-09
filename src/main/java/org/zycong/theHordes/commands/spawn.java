@@ -10,21 +10,23 @@ import org.zycong.theHordes.helpers.yaml.yamlManager;
 
 import java.util.List;
 
+import static org.zycong.theHordes.TheHordes.Colorize;
+
 public class spawn implements CommandHandler {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
         Player p = (Player) commandSender;
         if (args.length == 0){
             p.teleport((Location) yamlManager.getInstance().getOption("config", "spawn.location"));
-            p.sendMessage((TextComponent)yamlManager.getInstance().getOption("messages", "command.success.spawn.tp"));
+            p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.success.spawn.tp").toString()));
         } else {
             if (args[0].equals("set")){
                 if (p.hasPermission("TheHordes.commands.setSpawn")){
                     Location loc = p.getLocation();
                     yamlManager.getInstance().setOption("config", "spawn.location", loc);
-                    p.sendMessage((TextComponent)yamlManager.getInstance().getOption("messages", "command.success.spawn.set"));
+                    p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.success.spawn.set").toString()));
                 } else{
-                    p.sendMessage((TextComponent)yamlManager.getInstance().getOption("messages", "command.failed.noPermission"));
+                    p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.noPermission").toString()));
                 }
             }
         }
@@ -33,6 +35,9 @@ public class spawn implements CommandHandler {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
+        if (commandSender.hasPermission("TheHordes.commands.setSpawn")){
+            return List.of("set");
+        }
         return List.of();
     }
 }
