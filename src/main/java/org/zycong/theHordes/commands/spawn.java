@@ -1,20 +1,27 @@
 package org.zycong.theHordes.commands;
 
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Location;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.zycong.theHordes.helpers.commandHelper.CommandHandler;
+import org.zycong.theHordes.commands.CommandRegister.CommandRegister;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
-
-import java.util.List;
 
 import static org.zycong.theHordes.TheHordes.Colorize;
 
-public class spawn implements CommandHandler {
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
+public class spawn {
+
+    @CommandRegister.Command(
+            name = "spawn",
+            playerOnly = true,
+            permission = "theHordes.spawn",
+            aliases = "",
+            args =
+                    @CommandRegister.Arguments(args = {
+                            @CommandRegister.Arg(arg = "set", permission = "TheHordes.commands.setSpawn")
+                    }),
+            description = "Teleport you to spawn!"
+    )
+    public boolean onCommand(CommandSender commandSender, String[] args) {
         Player p = (Player) commandSender;
         if (args.length == 0){
             p.teleport((Location) yamlManager.getInstance().getOption("config", "spawn.location"));
@@ -31,13 +38,5 @@ public class spawn implements CommandHandler {
             }
         }
         return true;
-    }
-
-    @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
-        if (commandSender.hasPermission("TheHordes.commands.setSpawn")){
-            return List.of("set");
-        }
-        return List.of();
     }
 }

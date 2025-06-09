@@ -1,5 +1,8 @@
 package org.zycong.theHordes;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -8,6 +11,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.zycong.theHordes.commands.CommandRegister.CommandRegister;
 import org.zycong.theHordes.event.player.interaction;
 import org.zycong.theHordes.event.player.playerConnect;
 import org.zycong.theHordes.helpers.ColorUtils;
@@ -51,6 +55,22 @@ public final class TheHordes extends JavaPlugin {
             new DefensePlaceholder().register();
             new ManaPlaceholder().register();
         }
+
+        try (ScanResult result = new ClassGraph()
+                .enableClassInfo()
+                .enableAnnotationInfo()
+                .acceptPackages("io.RPGCraft.FableCraft") // path
+                .scan()) {
+
+            for (ClassInfo info : result.getClassesWithAnnotation(CommandRegister.AutoRegisterer.class.getName())) {
+                Class<?> clazz = info.loadClass();
+                Object instance = clazz.getDeclaredConstructor().newInstance();
+                CommandRegister.global().registerCommands(instance);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         registerListeners(
             new interaction(),
             new playerConnect()
