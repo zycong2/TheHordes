@@ -138,6 +138,7 @@ public class yamlManager {
             getFileConfig("messages").addDefault("command.success.spawn.set", "&aSuccessfully set the new spawn!");
             getFileConfig("messages").addDefault("command.success.spawn.tp", "&aSuccessfully teleported to spawn!");
             getFileConfig("messages").addDefault("command.success.lobbies.create", "&aSuccessfully made the new lobby at your location!");
+            getFileConfig("messages").addDefault("command.success.lobbies.delete", "&aSuccessfully deleted the lobby!");
 
             getFileConfig("messages").addDefault("event.success.addedToLobby", "&aYou successfully joined a lobby!");
             getFileConfig("messages").options().copyDefaults(true);
