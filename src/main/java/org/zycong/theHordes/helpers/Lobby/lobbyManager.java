@@ -1,15 +1,22 @@
 package org.zycong.theHordes.helpers.Lobby;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import net.kyori.adventure.bossbar.BossBar;
+import org.bukkit.event.EventHandler;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.zycong.theHordes.TheHordes;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static net.kyori.adventure.bossbar.BossBar.bossBar;
 import static org.zycong.theHordes.TheHordes.Colorize;
@@ -17,6 +24,7 @@ import static org.zycong.theHordes.TheHordes.Colorize;
 public class lobbyManager {
     static int maxPlayersInLobby = 16;
     static List<BossBar> timers = new ArrayList<>();
+    static List<List<String>> games = new ArrayList<>();
 
     public static void startTimers(){
         timers.clear();
@@ -40,6 +48,33 @@ public class lobbyManager {
                 count++;
             }
         }, 20L, 20L);
+
+        scheduler.scheduleSyncRepeatingTask(TheHordes.getPlugin(), () -> {
+            for (List l : games){
+                String lobby = l.get(0).toString();
+                if (yamlManager.getInstance().getOption("lobbies", lobby + ".spawnedAllZombies") == null) { spawnZombies(l); }
+                else if (!(boolean) yamlManager.getInstance().getOption("lobbies", lobby + ".spawnedAllZombies")) { spawnZombies(l); }
+
+            }
+        }, 20L, 20L);
+    }
+
+
+    static void spawnZombies(List<String> l){
+        String lobby = l.get(0).toString();
+
+        int difficulty = Integer.parseInt(l.get(1).toString()) + 1;
+        int waves = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".wave");
+
+        Location lobbyLoc = (Location) yamlManager.getInstance().getOption("lobbies", lobby + ".location");
+        List<Location> spawnLocations = (List<Location>) yamlManager.getInstance().getOption("lobbies", lobby + ".map.spawnLoc");
+        int maxSpawns = difficulty * waves;
+        for (int i = 0; i < maxSpawns; i++) {
+            Random rand = new Random();
+            Entity entity = spawnLocations.get(0).getWorld().spawnEntity(spawnLocations.get(rand.nextInt(spawnLocations.size())), EntityType.ZOMBIE);
+        }
+        yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", true);
+        yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns);
     }
 
     public static void addToLobby(Player p){
@@ -91,7 +126,7 @@ public class lobbyManager {
         List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
         for (Object o : lobbies) {
             if (currentCount == count) {
-                Location loc = (Location) yamlManager.getInstance().getOption("lobbies", o + ".location");
+                Location loc = (Location) yamlManager.getInstance().getOption("lobbies", o + ".map.location");
                 List playerObjects = (List) yamlManager.getInstance().getOption("lobbies", o + ".players");
                 List<Player> players = new ArrayList<>();
                 for (Object ob : playerObjects){
@@ -99,8 +134,70 @@ public class lobbyManager {
                         p.teleport(loc);
                     }
                 }
+                yamlManager.getInstance().setOption("lobbies", o + ".wave", 1);
+                if (count == 0){
+                    games.add(List.of(o.toString(), String.valueOf(count+1)));
+                }else {
+                    games.add(List.of(o.toString(), String.valueOf(count)));
+                }
+
+
+
             }
             currentCount ++;
+        }
+    }
+
+    public static boolean playerIsInGame(Player p){
+        List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
+        for (Object o : lobbies) {
+            List playerObjects = (List) yamlManager.getInstance().getOption("lobbies", o + ".players");
+            for (Object ob : playerObjects){
+                if (ob instanceof Player pla){
+                    if (p == pla){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static String getPlayerGame(Player p){
+        List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
+        for (Object o : lobbies) {
+            List playerObjects = (List) yamlManager.getInstance().getOption("lobbies", o + ".players");
+            for (Object ob : playerObjects){
+                if (ob instanceof Player pla){
+                    if (p == pla){
+                        return o.toString();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static void zombieKilled(Player p){
+        String lobby = getPlayerGame(p);
+        int kills = 0;
+        if (yamlManager.getInstance().getOption("lobbies", lobby + ".killed") == null){
+        }else {
+            kills = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".killed");
+        }
+
+        kills++;
+        yamlManager.getInstance().setOption("lobbies", lobby + ".killed", kills); //zombieCount
+        if ((int)yamlManager.getInstance().getOption("lobbies", lobby + ".zombieCount") <= kills){
+            int wave = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".wave");
+            wave++;
+            yamlManager.getInstance().setOption("lobbies", lobby + ".wave", wave);
+            p.showTitle(Title.title(
+                    Component.text("Wave " + wave), Component.text(""),
+                    Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))
+            ));
+            yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", false);
+            yamlManager.getInstance().setOption("lobbies", lobby + ".killed", 0);
         }
     }
 }

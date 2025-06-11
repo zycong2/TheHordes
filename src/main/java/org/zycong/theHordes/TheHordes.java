@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.zycong.theHordes.commands.CommandRegister.CommandRegister;
+import org.zycong.theHordes.event.entity.zombie;
 import org.zycong.theHordes.event.player.interaction;
 import org.zycong.theHordes.event.player.playerConnect;
 import org.zycong.theHordes.helpers.ColorUtils;
@@ -75,7 +76,8 @@ public final class TheHordes extends JavaPlugin {
 
         registerListeners(
             new interaction(),
-            new playerConnect()
+            new playerConnect(),
+            new zombie()
         );
 
         this.getCommand("TheHordes").setExecutor(new CommandManager());
