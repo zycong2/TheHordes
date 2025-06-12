@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 
 import static org.zycong.theHordes.helpers.ColorUtils.colorize;
 import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.*;
@@ -28,6 +29,6 @@ public class playerConnect implements Listener {
     }
     @EventHandler
     void onQuit(PlayerQuitEvent event){
-
+        lobbyManager.playerAwayFromGame(event.getPlayer());
     }
 }

@@ -15,6 +15,7 @@ import org.zycong.theHordes.commands.CommandRegister.CommandRegister;
 import org.zycong.theHordes.event.entity.zombie;
 import org.zycong.theHordes.event.player.interaction;
 import org.zycong.theHordes.event.player.playerConnect;
+import org.zycong.theHordes.event.player.playerDeath;
 import org.zycong.theHordes.helpers.ColorUtils;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.DefensePlaceholder;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.ManaPlaceholder;
@@ -77,7 +78,8 @@ public final class TheHordes extends JavaPlugin {
         registerListeners(
             new interaction(),
             new playerConnect(),
-            new zombie()
+            new zombie(),
+            new playerDeath()
         );
 
         this.getCommand("TheHordes").setExecutor(new CommandManager());

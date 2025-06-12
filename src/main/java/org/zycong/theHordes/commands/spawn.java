@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.zycong.theHordes.commands.CommandRegister.CommandRegister;
+import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
 
 import static org.zycong.theHordes.TheHordes.Colorize;
@@ -26,6 +27,7 @@ public class spawn {
         if (args.length == 0){
             p.teleport((Location) yamlManager.getInstance().getOption("config", "spawn.location"));
             p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.success.spawn.tp").toString()));
+            lobbyManager.playerAwayFromGame(p);
         } else {
             if (args[0].equals("set")){
                 if (p.hasPermission("TheHordes.commands.setSpawn")){

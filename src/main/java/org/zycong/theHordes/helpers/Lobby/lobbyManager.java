@@ -2,13 +2,9 @@ package org.zycong.theHordes.helpers.Lobby;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import net.kyori.adventure.bossbar.BossBar;
-import org.bukkit.event.EventHandler;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.zycong.theHordes.TheHordes;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
@@ -60,21 +56,46 @@ public class lobbyManager {
     }
 
 
-    static void spawnZombies(List<String> l){
-        String lobby = l.get(0).toString();
+    static void spawnZombies(List<String> l) {
+        try {
+            String lobby = l.get(0).toString();
 
-        int difficulty = Integer.parseInt(l.get(1).toString()) + 1;
-        int waves = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".wave");
+            int difficulty = Integer.parseInt(l.get(1).toString()) + 1;
+            int waves = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".wave");
 
-        Location lobbyLoc = (Location) yamlManager.getInstance().getOption("lobbies", lobby + ".location");
-        List<Location> spawnLocations = (List<Location>) yamlManager.getInstance().getOption("lobbies", lobby + ".map.spawnLoc");
-        int maxSpawns = difficulty * waves;
-        for (int i = 0; i < maxSpawns; i++) {
-            Random rand = new Random();
-            Entity entity = spawnLocations.get(0).getWorld().spawnEntity(spawnLocations.get(rand.nextInt(spawnLocations.size())), EntityType.ZOMBIE);
-        }
-        yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", true);
-        yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns);
+            Location lobbyLoc = (Location) yamlManager.getInstance().getOption("lobbies", lobby + ".location");
+            List<Location> spawnLocations = (List<Location>) yamlManager.getInstance().getOption("lobbies", lobby + ".map.spawnLoc");
+            int maxSpawns = difficulty * waves;
+            for (Object o : (List) yamlManager.getInstance().getOption("lobbies", lobby + ".players")) {
+                if (o instanceof Player p) {
+                    if (waves == 1) {
+                        List<Entity> ents = p.getNearbyEntities(10, p.getWorld().getMaxHeight() * 2, 10);
+
+                        for (Entity ent : ents) {
+                            if (ent instanceof Monster) {
+                                ((Monster) ent).setHealth(0);
+                            }
+                        }
+                    }
+                    List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
+                    int lNumber = 0;
+                    for (Object ob : lobbies) {
+                        if (ob.toString().equals(lobby)) {
+                            p.hideBossBar(timers.get(lNumber));
+                        }
+                        lNumber++;
+                    }
+
+                }
+            }
+
+            for (int i = 0; i < maxSpawns; i++) {
+                Random rand = new Random();
+                Entity entity = spawnLocations.get(0).getWorld().spawnEntity(spawnLocations.get(rand.nextInt(spawnLocations.size())), EntityType.ZOMBIE);
+            }
+            yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", true);
+            yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns);
+        } catch (NullPointerException ignored) {}
     }
 
     public static void addToLobby(Player p){
@@ -86,28 +107,30 @@ public class lobbyManager {
             if (playerObject == null) {playerObject = List.of(); }
             if (playerObject instanceof List players){
                 if (players.size() <= 16) {
-                    if (players.contains(p)) {
+                    if (yamlManager.getInstance().getOption("lobbies", o + ".wave") == null) {
+                        if (players.contains(p)) {
+                            return;
+                        }
+
+                        List<Player> newPlayers = new ArrayList<>();
+                        newPlayers.addAll(players);
+                        newPlayers.add(p);
+
+                        yamlManager.getInstance().setOption("lobbies", o + ".players", newPlayers);
+                        p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "event.success.addedToLobby").toString()));
+                        Location loc = (Location) yamlManager.getInstance().getOption("lobbies", o + ".location");
+                        p.teleport(loc);
+                        if (newPlayers.size() == 1) {
+                            try {
+                                timers.get(lNumber).progress(BossBar.MAX_PROGRESS);
+                            } catch (IndexOutOfBoundsException e) {
+                                startTimers();
+                                timers.get(lNumber).progress(BossBar.MAX_PROGRESS);
+                            }
+                        }
+                        p.showBossBar(timers.get(lNumber));
                         return;
                     }
-
-                    List<Player> newPlayers = new ArrayList<>();
-                    newPlayers.addAll(players);
-                    newPlayers.add(p);
-
-                    yamlManager.getInstance().setOption("lobbies", o + ".players", newPlayers);
-                    p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "event.success.addedToLobby").toString()));
-                    Location loc = (Location) yamlManager.getInstance().getOption("lobbies", o + ".location");
-                    p.teleport(loc);
-                    if (newPlayers.size() == 1){
-                        try {
-                            timers.get(lNumber).progress(BossBar.MAX_PROGRESS);
-                        }catch (IndexOutOfBoundsException e){
-                            startTimers();
-                            timers.get(lNumber).progress(BossBar.MAX_PROGRESS);
-                        }
-                    }
-                    p.showBossBar(timers.get(lNumber));
-                    return;
                 }
             }
             lNumber ++;
@@ -118,6 +141,10 @@ public class lobbyManager {
         List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
         for (Object o : lobbies){
             yamlManager.getInstance().setOption("lobbies", o + ".players", List.of());
+            yamlManager.getInstance().setOption("lobbies", o + ".killed", null);
+            yamlManager.getInstance().setOption("lobbies", o + ".zombieCount", null);
+            yamlManager.getInstance().setOption("lobbies", o + ".spawnedAllZombies", null);
+            yamlManager.getInstance().setOption("lobbies", o + ".wave", null);
         }
     }
 
@@ -199,5 +226,35 @@ public class lobbyManager {
             yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", false);
             yamlManager.getInstance().setOption("lobbies", lobby + ".killed", 0);
         }
+    }
+
+    public static void playerAwayFromGame(Player p){
+        if (playerIsInGame(p)){
+            String lobby = getPlayerGame(p);
+            List players = (List) yamlManager.getInstance().getOption("lobbies", lobby + ".players");
+            players.remove(p);
+
+            if (players.isEmpty()){
+                resetMap(lobby);
+            } else {
+                yamlManager.getInstance().setOption("lobbies", lobby + ".players", players);
+            }
+        }
+    }
+
+    public static void resetMap(String o){
+        int currentCount = 0;
+        List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
+        for (Object ob : lobbies) {
+            if (ob.toString().equals(o)){
+                games.remove(List.of(o, yamlManager.getInstance().getOption("lobbies", o + ".wave")));
+            }
+        }
+        yamlManager.getInstance().setOption("lobbies", o + ".players", List.of());
+        yamlManager.getInstance().setOption("lobbies", o + ".killed", null);
+        yamlManager.getInstance().setOption("lobbies", o + ".zombieCount", null);
+        yamlManager.getInstance().setOption("lobbies", o + ".spawnedAllZombies", null);
+        yamlManager.getInstance().setOption("lobbies", o + ".wave", null);
+
     }
 }
