@@ -1,68 +1,77 @@
 package org.zycong.theHordes.helpers.GUI.GUI;
 
+import lombok.Getter;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
+import org.zycong.theHordes.TheHordes;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.zycong.theHordes.TheHordes.Colorize;
 
-public class GUI {
+public class GUI implements InventoryHolder {
 
     private String Title;
-    private static Rows Rows;
+    private Rows Row;
     private Inventory inventory;
 
+    @Getter
+    private Map<Integer, GUIItem> itemMap;
 
     public GUI(String title, Rows rows) {
         this.Title = title;
-        this.Rows = rows;
+        this.Row = rows;
 
-        buildInventory(this.Title, this.Rows);
+        buildInventory(this.Title, this.Row);
     }
 
     public GUI(String title) {
         this.Title = title;
-        this.Rows = GUI.Rows.ONE;
+        this.Row = Rows.ONE;
 
-        buildInventory(this.Title, this.Rows);
+        buildInventory(this.Title, this.Row);
     }
 
-    public static void setItem(int slot, GUIItem item){
-
+    public void setItem(int slot, GUIItem item){
+        inventory.setItem(slot, item.toItemStack());
+        itemMap.put(slot, item);
     }
 
-    public static void setItem(int slot, ItemStack item){
-
+    public void setItem(int slot, ItemStack item) {
+        inventory.setItem(slot, item);
+        itemMap.put(slot, GUIItem.ItemStackToGUIItem(item));
     }
 
-    public static void open(Player player){
-
+    public void open(Player player){
+        player.openInventory(inventory);
     }
 
-    public static void open(Integer page, Player player){
-
-    }
-
-    public static void open(Player player, Integer delay){
-
-    }
-
-    public static void open(Player player, Integer delay, Integer page){
-
+    public void open(Player player, Integer delay){
+        Bukkit.getScheduler().runTaskLater(TheHordes.getPlugin(), new BukkitRunnable() {
+            @Override
+            public void run() {
+                player.openInventory(inventory);
+            }
+        }, delay);
     }
 
     private void buildInventory(String Title, Rows Rows){
         TextComponent colorized = Colorize(Title);
-        Inventory inv = Bukkit.createInventory(null, Rows.getValue()*9, colorized);
+        Inventory inv = Bukkit.createInventory(this, Rows.getValue()*9, colorized);
 
         this.inventory = inv;
     }
 
+    @Override
+    public @NotNull Inventory getInventory() {
+        return this.inventory;
+    }
 
     public enum Rows{
         ONE(1),

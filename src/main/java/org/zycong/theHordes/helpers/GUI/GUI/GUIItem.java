@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.zycong.theHordes.TheHordes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -42,9 +43,6 @@ public class GUIItem {
         return item;
     }
 
-
-
-
     public Material getMaterial() {return material;}
 
     public GUIItem setMaterial(Material material) {this.material = material;return this;}
@@ -69,8 +67,21 @@ public class GUIItem {
     public GUIItem setClickEvent(Consumer<ClickContext> clickEvent) {this.clickEvent = clickEvent;return this;}
 
 
-
-
-
     public record ClickContext(Player player, ClickType clickType, GUI gui) {}
+
+    public static GUIItem ItemStackToGUIItem(ItemStack item){
+        List<Enchants> list = new ArrayList<>();
+        item.getEnchantments().forEach(
+                (enchantment, integer) -> {
+                    list.add(new Enchants().setEnchantment(enchantment).setLevel(integer));
+                }
+        );
+        GUIItem output = new GUIItem()
+                .setMaterial(item.getType() != null ? item.getType() : Material.DIRT)
+                .setName(item.getItemMeta().getDisplayName())
+                .setLore(item.getItemMeta().getLore())
+                .setCustomModelData(item.getItemMeta().getCustomModelData())
+                .setEnchantments(list);
+        return output;
+    }
 }
