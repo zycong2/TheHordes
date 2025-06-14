@@ -9,6 +9,7 @@ import org.zycong.theHordes.helpers.yaml.yamlManager;
 
 import static org.zycong.theHordes.TheHordes.Colorize;
 
+@CommandRegister.AutoRegisterer
 public class spawn {
 
     @CommandRegister.Command(
