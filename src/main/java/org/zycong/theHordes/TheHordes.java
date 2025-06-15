@@ -62,10 +62,12 @@ public final class TheHordes extends JavaPlugin {
             new ManaPlaceholder().register();
         }
 
+        new CommandRegister(this);
+
         try (ScanResult result = new ClassGraph()
                 .enableClassInfo()
                 .enableAnnotationInfo()
-                .acceptPackages("io.RPGCraft.FableCraft") // path
+                .acceptPackages("org.zycong.theHordes") // path
                 .scan()) {
 
             for (ClassInfo info : result.getClassesWithAnnotation(CommandRegister.AutoRegisterer.class.getName())) {

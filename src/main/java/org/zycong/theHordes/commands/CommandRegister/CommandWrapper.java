@@ -6,10 +6,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class CommandWrapper extends Command {
@@ -51,10 +49,9 @@ public class CommandWrapper extends Command {
         int index = args.length - 1;
         if (index < 0 || index >= suggestions.length) return List.of();
         List<CommandRegister.Arg> arguments = Arrays.asList(suggestions[index].args());
-        List<String> s = arguments.stream()
+        return arguments.stream()
                 .filter(arg -> sender.hasPermission(arg.permission()))
                 .map(CommandRegister.Arg::arg)
                 .collect(Collectors.toList());
-        return s;
     }
 }

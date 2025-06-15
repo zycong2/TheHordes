@@ -21,8 +21,11 @@ public class GUI implements InventoryHolder {
     private Rows Row;
     private Inventory inventory;
 
-    @Getter
     private Map<Integer, GUIItem> itemMap;
+
+    Map<Integer, GUIItem> getItemMap(){
+        return itemMap;
+    }
 
     public GUI(String title, Rows rows) {
         this.Title = title;

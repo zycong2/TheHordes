@@ -3,6 +3,7 @@ package org.zycong.theHordes.commands.CommandRegister;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.zycong.theHordes.TheHordes;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -53,6 +54,10 @@ public class CommandRegister {
     public @interface AutoRegisterer {}
 
 
+    // Copy this to the method parameters
+    //
+    // CommandSender commandSender, String[] args
+    //
     // Command annotation itself
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
