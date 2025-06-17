@@ -17,13 +17,12 @@ import org.zycong.theHordes.event.player.interaction;
 import org.zycong.theHordes.event.player.playerConnect;
 import org.zycong.theHordes.event.player.playerDeath;
 import org.zycong.theHordes.helpers.ColorUtils;
-import org.zycong.theHordes.helpers.GUI.GUI.GUI;
 import org.zycong.theHordes.helpers.GUI.GUI.GUIListener;
+import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.DefensePlaceholder;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.ManaPlaceholder;
 import org.zycong.theHordes.helpers.commandHelper.CommandManager;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
-import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 
 import java.util.Arrays;
 import java.util.HashMap;

@@ -54,11 +54,13 @@ public class CommandRegister {
     public @interface AutoRegisterer {}
 
 
-    // Copy this to the method parameters
-    //
-    // CommandSender commandSender, String[] args
-    //
-    // Command annotation itself
+    /*
+      Copy this to the method parameters
+
+      CommandSender commandSender, String[] args
+
+      Command annotation itself
+    */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     public @interface Command {
