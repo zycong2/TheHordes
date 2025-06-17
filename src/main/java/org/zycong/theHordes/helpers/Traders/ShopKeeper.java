@@ -3,6 +3,7 @@ package org.zycong.theHordes.helpers.Traders;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Merchant;
@@ -30,10 +31,7 @@ public class ShopKeeper {
             args = {
                     @CommandRegister.Arguments(
                             args = {
-                                    @CommandRegister.Arg(arg = "create", permission = "theHordes.shop.create"),
-                                    @CommandRegister.Arg(arg = "noAI", permission = "theHordes.item.noAI"),
-                                    @CommandRegister.Arg(arg = "baby", permission = "theHordes.item.baby"),
-                                    @CommandRegister.Arg(arg = "profession", permission = "theHordes.item.profession")
+                                    @CommandRegister.Arg(arg = "create", permission = "theHordes.shop.create")
                             }
                     )
             },
@@ -43,6 +41,7 @@ public class ShopKeeper {
         switch (args[1]){
             case "create": {
                 Player sender = (Player) commandSender;
+                MobNPC mobNPC = new MobNPC(EntityType.VILLAGER);
             }
         }
     }
