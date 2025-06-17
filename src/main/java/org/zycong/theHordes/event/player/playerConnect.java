@@ -27,7 +27,7 @@ public class playerConnect implements Listener {
         meta.setDisplayName(colorize("&aStart game!", '&'));
         startGame.setItemMeta(meta);
         setItemPDC("events", startGame, "startGame");
-        p.getInventory().setItem(8, startGame);
+        p.getInventory().setItem(4, startGame);
     }
     @EventHandler
     void onQuit(PlayerQuitEvent event){
