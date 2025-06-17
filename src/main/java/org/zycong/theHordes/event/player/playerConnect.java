@@ -1,5 +1,6 @@
 package org.zycong.theHordes.event.player;
 
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,6 +19,7 @@ public class playerConnect implements Listener {
     void onJoin(PlayerJoinEvent event){
         Player p = event.getPlayer();
         p.performCommand("spawn");
+        p.setGameMode(GameMode.ADVENTURE);
         p.getInventory().clear();
 
         ItemStack startGame = new ItemStack(Material.LIME_CONCRETE, 1);

@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import org.zycong.theHordes.helpers.Lobby.lobbyManager;
+import org.zycong.theHordes.commands.kits;
 
 import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.*;
 
@@ -24,6 +25,8 @@ public class interaction implements Listener {
         switch (getItemPDC("events", item)){
             case "startGame" :{
                 lobbyManager.addToLobby(p);
+            } case "kits" : {
+                kits.openSelector(p);
             }
         }
         p.getInventory().setItem(event.getHand(), new ItemStack(Material.AIR));

@@ -12,6 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.zycong.theHordes.commands.CommandRegister.CommandRegister;
+import org.zycong.theHordes.event.GUI.click;
+import org.zycong.theHordes.event.GUI.openClose;
 import org.zycong.theHordes.event.entity.zombie;
 import org.zycong.theHordes.event.player.interaction;
 import org.zycong.theHordes.event.player.playerConnect;
@@ -32,7 +34,7 @@ import java.util.logging.Logger;
 
 public final class TheHordes extends JavaPlugin {
 
-    public static List<String> yamlFiles = List.of("data", "messages", "config", "lobbies");
+    public static List<String> yamlFiles = List.of("data", "messages", "config", "lobbies", "kits");
     public static List<YamlConfiguration> fileConfigurationList = new java.util.ArrayList<>(List.of());
 
     public static Map<String, YamlConfiguration> ItemDB = new HashMap<>();
@@ -50,9 +52,10 @@ public final class TheHordes extends JavaPlugin {
     public void onEnable() {
         Logger reflectionsLogger = Logger.getLogger("org.reflections");
         reflectionsLogger.setLevel(Level.OFF);
-
         yamlManager.getInstance().loadData();
+
         lobbyManager.startTimers();
+        lobbyManager.clearLobbies();
 
         if(doesPluginExist("LuckPerms")){IsLuckperms = true;}
         if(doesPluginExist("PlaceholderAPI")){IsPlaceholderAPI = true;
@@ -79,7 +82,9 @@ public final class TheHordes extends JavaPlugin {
             new interaction(),
             new playerConnect(),
             new zombie(),
-            new playerDeath()
+            new playerDeath(),
+            new openClose(),
+            new click()
         );
 
         this.getCommand("TheHordes").setExecutor(new CommandManager());
@@ -91,6 +96,7 @@ public final class TheHordes extends JavaPlugin {
     @Override
     public void onDisable() {
         yamlManager.getInstance().saveData();
+
         lobbyManager.clearLobbies();
     }
 

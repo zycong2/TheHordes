@@ -71,6 +71,7 @@ public class yamlManager {
                     if (Objects.equals(s, config)) {break;}
                     index++;
                 }
+
                 TheHordes.fileConfigurationList.set(index, YamlConfiguration.loadConfiguration(cfile));
             }
         }
@@ -329,5 +330,17 @@ public class yamlManager {
     }
     public boolean isConfigSet(String path) {
         return getFileConfig("config").get(path) != null;
+    }
+
+    public boolean itemExists(String name){
+        List<Object> nodes = getAllNodesInDB("itemDB");
+        for (Object o : nodes){
+            if (o instanceof String s){
+                if (s.equals(name)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

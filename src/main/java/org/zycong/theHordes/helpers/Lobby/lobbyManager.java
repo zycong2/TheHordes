@@ -2,11 +2,16 @@ package org.zycong.theHordes.helpers.Lobby;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.*;
 import net.kyori.adventure.bossbar.BossBar;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.zycong.theHordes.TheHordes;
+import org.zycong.theHordes.helpers.PDCHelper.PDCHelper;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
 
 import java.time.Duration;
@@ -57,7 +62,7 @@ public class lobbyManager {
 
 
     static void spawnZombies(List<String> l) {
-        try {
+
             String lobby = l.get(0).toString();
 
             int difficulty = Integer.parseInt(l.get(1).toString()) + 1;
@@ -65,6 +70,8 @@ public class lobbyManager {
 
             Location lobbyLoc = (Location) yamlManager.getInstance().getOption("lobbies", lobby + ".location");
             List<Location> spawnLocations = (List<Location>) yamlManager.getInstance().getOption("lobbies", lobby + ".map.spawnLoc");
+
+            Bukkit.getLogger().info("spawning... difficulty: " + difficulty + " waves: " + waves);
             int maxSpawns = difficulty * waves;
             for (Object o : (List) yamlManager.getInstance().getOption("lobbies", lobby + ".players")) {
                 if (o instanceof Player p) {
@@ -88,14 +95,14 @@ public class lobbyManager {
 
                 }
             }
-
+            Bukkit.getLogger().info("spawneding max " + maxSpawns + " zombies spawnlocations: " + spawnLocations.size());
             for (int i = 0; i < maxSpawns; i++) {
                 Random rand = new Random();
                 Entity entity = spawnLocations.get(0).getWorld().spawnEntity(spawnLocations.get(rand.nextInt(spawnLocations.size())), EntityType.ZOMBIE);
+                Bukkit.getLogger().info("spawned 1 zombie");
             }
             yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", true);
             yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns);
-        } catch (NullPointerException ignored) {}
     }
 
     public static void addToLobby(Player p){
@@ -111,6 +118,13 @@ public class lobbyManager {
                         if (players.contains(p)) {
                             return;
                         }
+
+                        ItemStack kitSelect = new ItemStack(Material.IRON_SWORD);
+                        ItemMeta meta = kitSelect.getItemMeta();
+                        meta.displayName(Colorize("&aSelect kit"));
+                        kitSelect.setItemMeta(meta);
+                        PDCHelper.setItemPDC("events", kitSelect, "kits");
+                        p.getInventory().addItem(kitSelect);
 
                         List<Player> newPlayers = new ArrayList<>();
                         newPlayers.addAll(players);
@@ -139,6 +153,7 @@ public class lobbyManager {
 
     public static void clearLobbies(){
         List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
+        games.clear();
         for (Object o : lobbies){
             yamlManager.getInstance().setOption("lobbies", o + ".players", List.of());
             yamlManager.getInstance().setOption("lobbies", o + ".killed", null);
@@ -159,6 +174,13 @@ public class lobbyManager {
                 for (Object ob : playerObjects){
                     if (ob instanceof Player p){
                         p.teleport(loc);
+                        p.getInventory().clear();
+                        if (PDCHelper.getPlayerPDC("selectedKit", p) == null){
+                            PDCHelper.setPlayerPDC("selectedKit", p, yamlManager.getInstance().getNodes("kits", "").get(0).toString());
+                        }
+                        for (ItemStack item : (List<ItemStack>)yamlManager.getInstance().getOption("kits", PDCHelper.getPlayerPDC("selectedKit", p) + ".items")){
+                            p.getInventory().addItem(item);
+                        }
                     }
                 }
                 yamlManager.getInstance().setOption("lobbies", o + ".wave", 1);

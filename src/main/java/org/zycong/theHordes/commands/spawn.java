@@ -1,5 +1,6 @@
 package org.zycong.theHordes.commands;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -28,6 +29,7 @@ public class spawn {
             p.teleport((Location) yamlManager.getInstance().getOption("config", "spawn.location"));
             p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.success.spawn.tp").toString()));
             lobbyManager.playerAwayFromGame(p);
+            p.setGameMode(GameMode.ADVENTURE);
         } else {
             if (args[0].equals("set")){
                 if (p.hasPermission("TheHordes.commands.setSpawn")){
