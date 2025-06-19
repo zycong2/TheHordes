@@ -29,7 +29,7 @@ public class interaction implements Listener {
                 kits.openSelector(p);
             }
         }
-        p.getInventory().setItem(event.getHand(), new ItemStack(Material.AIR));
+
 
 
 

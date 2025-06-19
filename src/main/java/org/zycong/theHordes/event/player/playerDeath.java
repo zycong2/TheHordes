@@ -20,7 +20,6 @@ public class playerDeath implements Listener {
     }
     @EventHandler
     void playerRespawnEvent(PlayerRespawnEvent event){
-        event.getPlayer().performCommand("spawn");
         event.getPlayer().setGameMode(GameMode.ADVENTURE);
         event.getPlayer().getInventory().clear();
         ItemStack startGame = new ItemStack(Material.LIME_CONCRETE, 1);
@@ -29,5 +28,6 @@ public class playerDeath implements Listener {
         startGame.setItemMeta(meta);
         setItemPDC("events", startGame, "startGame");
         event.getPlayer().getInventory().setItem(8, startGame);
+        event.getPlayer().performCommand("spawn");
     }
 }

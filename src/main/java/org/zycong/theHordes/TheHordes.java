@@ -6,12 +6,15 @@ import io.github.classgraph.ScanResult;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.zycong.theHordes.commands.CommandRegister.CommandRegister;
+import org.zycong.theHordes.event.GUI.click;
+import org.zycong.theHordes.event.GUI.openClose;
 import org.zycong.theHordes.event.entity.zombie;
 import org.zycong.theHordes.event.player.interaction;
 import org.zycong.theHordes.event.player.playerConnect;
@@ -34,7 +37,7 @@ import java.util.logging.Logger;
 
 public final class TheHordes extends JavaPlugin {
 
-    public static List<String> yamlFiles = List.of("data", "messages", "config", "lobbies");
+    public static List<String> yamlFiles = List.of("data", "messages", "config", "lobbies", "kits");
     public static List<YamlConfiguration> fileConfigurationList = new java.util.ArrayList<>(List.of());
 
     public static Map<String, YamlConfiguration> ItemDB = new HashMap<>();
@@ -84,7 +87,9 @@ public final class TheHordes extends JavaPlugin {
             new playerConnect(),
             new zombie(),
             new playerDeath(),
-            new GUIListener()
+            new GUIListener(),
+            new click(),
+            new openClose()
         );
 
         this.getCommand("TheHordes").setExecutor(new CommandManager());
@@ -95,8 +100,8 @@ public final class TheHordes extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        yamlManager.getInstance().saveData();
         lobbyManager.clearLobbies();
+        yamlManager.getInstance().saveData();
     }
 
     public static Plugin getPlugin() { return Bukkit.getServer().getPluginManager().getPlugin("TheHordes"); }
@@ -141,5 +146,14 @@ public final class TheHordes extends JavaPlugin {
 
     private void registerListeners(Listener... l) {
         Arrays.asList(l).forEach(I-> getServer().getPluginManager().registerEvents(I, this));
+    }
+
+    public static String locationToString(Location loc){
+        return loc.getX() + ";" + loc.getY() + ";" + loc.getZ() + ";" + loc.getWorld().getName() + ";" + loc.getPitch() + ";" + loc.getYaw();
+    }
+
+    public static Location stringToLocation(String s){
+        String[] cords = s.split(";");
+        return new Location(Bukkit.getWorld(cords[3]), Double.parseDouble(cords[0]), Double.parseDouble(cords[1]), Double.parseDouble(cords[2]), Float.parseFloat(cords[4]), Float.parseFloat(cords[5]));
     }
 }

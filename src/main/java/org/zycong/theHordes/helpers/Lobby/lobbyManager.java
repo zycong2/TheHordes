@@ -3,6 +3,7 @@ package org.zycong.theHordes.helpers.Lobby;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
@@ -62,19 +63,27 @@ public class lobbyManager {
 
 
     static void spawnZombies(List<String> l) {
+        try {
+
 
             String lobby = l.get(0).toString();
 
             int difficulty = Integer.parseInt(l.get(1).toString()) + 1;
             int waves = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".wave");
 
-            Location lobbyLoc = (Location) yamlManager.getInstance().getOption("lobbies", lobby + ".location");
-            List<Location> spawnLocations = (List<Location>) yamlManager.getInstance().getOption("lobbies", lobby + ".map.spawnLoc");
+            Location lobbyLoc = TheHordes.stringToLocation((String) yamlManager.getInstance().getOption("lobbies", lobby + ".location"));
+            List<String> spawnLocationsString = (List<String>) yamlManager.getInstance().getOption("lobbies", lobby + ".map.spawnLoc");
+
+            List<Location> spawnLocations = new ArrayList<>();
+            for (String s : spawnLocationsString) {
+                spawnLocations.add(TheHordes.stringToLocation(s));
+            }
 
             Bukkit.getLogger().info("spawning... difficulty: " + difficulty + " waves: " + waves);
             int maxSpawns = difficulty * waves;
             for (Object o : (List) yamlManager.getInstance().getOption("lobbies", lobby + ".players")) {
                 if (o instanceof Player p) {
+                    p.setGameMode(GameMode.ADVENTURE);
                     if (waves == 1) {
                         List<Entity> ents = p.getNearbyEntities(10, p.getWorld().getMaxHeight() * 2, 10);
 
@@ -103,9 +112,13 @@ public class lobbyManager {
             }
             yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", true);
             yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns);
+        } catch (NullPointerException exeption) {
+            games.remove(l);
+        }
     }
 
     public static void addToLobby(Player p){
+        p.getInventory().clear();
         List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
         maxPlayersInLobby = lobbies.size();
         int lNumber = 0;
@@ -132,8 +145,9 @@ public class lobbyManager {
 
                         yamlManager.getInstance().setOption("lobbies", o + ".players", newPlayers);
                         p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "event.success.addedToLobby").toString()));
-                        Location loc = (Location) yamlManager.getInstance().getOption("lobbies", o + ".location");
+                        Location loc = TheHordes.stringToLocation((String) yamlManager.getInstance().getOption("lobbies", o + ".location"));
                         p.teleport(loc);
+                        p.setGameMode(GameMode.ADVENTURE);
                         if (newPlayers.size() == 1) {
                             try {
                                 timers.get(lNumber).progress(BossBar.MAX_PROGRESS);
@@ -168,12 +182,13 @@ public class lobbyManager {
         List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
         for (Object o : lobbies) {
             if (currentCount == count) {
-                Location loc = (Location) yamlManager.getInstance().getOption("lobbies", o + ".map.location");
+                Location loc = TheHordes.stringToLocation((String) yamlManager.getInstance().getOption("lobbies", o + ".map.location"));
                 List playerObjects = (List) yamlManager.getInstance().getOption("lobbies", o + ".players");
                 List<Player> players = new ArrayList<>();
                 for (Object ob : playerObjects){
                     if (ob instanceof Player p){
                         p.teleport(loc);
+                        p.setGameMode(GameMode.ADVENTURE);
                         p.getInventory().clear();
                         if (PDCHelper.getPlayerPDC("selectedKit", p) == null){
                             PDCHelper.setPlayerPDC("selectedKit", p, yamlManager.getInstance().getNodes("kits", "").get(0).toString());

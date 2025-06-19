@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.zycong.theHordes.helpers.commandHelper.CommandHandler;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
+import org.zycong.theHordes.TheHordes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +29,10 @@ public class lobbies implements CommandHandler {
 
         if (args[0].equalsIgnoreCase("create")){
             if (args.length == 2){
-                yamlManager.getInstance().setOption("lobbies", args[1] + ".location", p.getLocation());
-                yamlManager.getInstance().setOption("lobbies", args[1] + ".map.location", new Location(Bukkit.getWorld("world"), 0d, 100d, 0d));
+                yamlManager.getInstance().setOption("lobbies", args[1] + ".location", TheHordes.locationToString(p.getLocation()));
+                yamlManager.getInstance().setOption("lobbies", args[1] + ".map.location", TheHordes.locationToString(new Location(Bukkit.getWorld("world"), 0d, 100d, 0d)));
                 yamlManager.getInstance().setOption("lobbies", args[1] + ".players", List.of());
-                yamlManager.getInstance().setOption("lobbies", args[1] + ".map.spawnLoc", List.of(new Location(Bukkit.getWorld("world"), 0d, 100d, 0d)));
+                yamlManager.getInstance().setOption("lobbies", args[1] + ".map.spawnLoc", List.of(TheHordes.locationToString(new Location(Bukkit.getWorld("world"), 0d, 100d, 0d))));
                 p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.success.lobbies.create").toString()));
                 return true;
             }else{
@@ -56,7 +57,7 @@ public class lobbies implements CommandHandler {
         } else if (args[0].equalsIgnoreCase("setMap")){
             if (args.length == 2){
                 if (yamlManager.getInstance().getOption("lobbies", args[1] + ".location") != null) {
-                    yamlManager.getInstance().setOption("lobbies", args[1] + ".map.location", p.getLocation());
+                    yamlManager.getInstance().setOption("lobbies", args[1] + ".map.location", TheHordes.locationToString(p.getLocation()));
                 }
             }else{
                 p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.noArgs").toString()));
@@ -65,9 +66,9 @@ public class lobbies implements CommandHandler {
         } else if (args[0].equalsIgnoreCase("spawnPoint")){
             if (args.length == 3){
                 if (args[2].equalsIgnoreCase("add")){
-                    List<Location> spawns = new ArrayList<>();
-                    spawns.addAll((List<Location>) yamlManager.getInstance().getOption("lobbies", args[1] + ".map.spawnLoc"));
-                    spawns.add(p.getLocation());
+                    List<String> spawns = new ArrayList<>();
+                    spawns.addAll((List<String>) yamlManager.getInstance().getOption("lobbies", args[1] + ".map.spawnLoc"));
+                    spawns.add(TheHordes.locationToString(p.getLocation()));
                     yamlManager.getInstance().setOption("lobbies", args[1] + ".map.spawnLoc", spawns);
                     p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.success.lobbies.location.added").toString()));
                 }

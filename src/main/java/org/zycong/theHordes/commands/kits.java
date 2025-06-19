@@ -52,8 +52,17 @@ public class kits implements CommandHandler {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
-        if (args.length == 0){
+        if (args.length == 1){
             return List.of("create", "edit", "delete");
+        } if (args.length == 2){
+            if (args[1].equalsIgnoreCase("edit") || args[1].equalsIgnoreCase("delete")){
+                List<Object> obs = yamlManager.getInstance().getNodes("kits", "");
+                List<String> arg = new ArrayList<>();
+                for (Object o : obs){
+                    if (o instanceof String st) {arg.add(st); }
+                }
+                return arg;
+            }
         }
         return List.of();
     }
