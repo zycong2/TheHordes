@@ -5,7 +5,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.*;
+import static org.zycong.theHordes.helpers.PDCHelper.*;
 
 public class ManaPlaceholder extends PlaceholderExpansion {
   @Override

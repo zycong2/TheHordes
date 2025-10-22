@@ -28,11 +28,13 @@ public class CommandWrapper extends Command {
     }
 
     @Override
-    public boolean execute(CommandSender sender, String label, String[] args) {
+    public boolean execute(@NotNull CommandSender sender, @NotNull String label, String[] args) {
         try {
-            if(annotation.playerOnly() == true) {
+            if(annotation.playerOnly()) {
 
-                if(sender instanceof Player p) {method.invoke(instance, sender, args);}
+                if(sender instanceof Player p) {
+                    method.invoke(instance, sender, args);
+                }
                 else{sender.sendMessage("Player ONLY!");}
 
             }else{method.invoke(instance, sender, args);}

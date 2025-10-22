@@ -13,8 +13,7 @@ import org.zycong.theHordes.helpers.yaml.yamlManager;
 import org.zycong.theHordes.TheHordes;
 
 import static org.zycong.theHordes.TheHordes.Colorize;
-import static org.zycong.theHordes.helpers.ColorUtils.colorize;
-import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.setItemPDC;
+import static org.zycong.theHordes.helpers.PDCHelper.setItemPDC;
 
 @CommandRegister.AutoRegisterer
 public class spawn {
@@ -41,10 +40,11 @@ public class spawn {
 
             ItemStack startGame = new ItemStack(Material.LIME_CONCRETE, 1);
             ItemMeta meta = startGame.getItemMeta();
-            meta.setDisplayName(colorize("&aStart game!", '&'));
+            meta.displayName(Colorize("&aStart game!"));
             startGame.setItemMeta(meta);
             setItemPDC("events", startGame, "startGame");
             p.getInventory().setItem(4, startGame);
+            return true;
         } else {
             if (args[0].equals("set")){
                 if (p.hasPermission("TheHordes.commands.setSpawn")){
@@ -55,7 +55,7 @@ public class spawn {
                     p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.noPermission").toString()));
                 }
             }
+            return true;
         }
-        return true;
     }
 }

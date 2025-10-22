@@ -20,7 +20,6 @@ import org.zycong.theHordes.event.player.interaction;
 import org.zycong.theHordes.event.player.playerConnect;
 import org.zycong.theHordes.event.player.playerDeath;
 import org.zycong.theHordes.helpers.ColorUtils;
-import org.zycong.theHordes.helpers.GUI.GUI.GUI;
 import org.zycong.theHordes.helpers.GUI.GUI.GUIListener;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.DefensePlaceholder;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderAPI.ManaPlaceholder;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public final class TheHordes extends JavaPlugin {
 
@@ -65,6 +65,9 @@ public final class TheHordes extends JavaPlugin {
             new ManaPlaceholder().register();
         }
 
+        CommandManager commandManager = new CommandManager();
+        commandManager.initialize(); // Pre-initialize command handlers
+
         new CommandRegister(this);
 
         try (ScanResult result = new ClassGraph()
@@ -83,18 +86,17 @@ public final class TheHordes extends JavaPlugin {
         }
 
         registerListeners(
-            new interaction(),
-            new playerConnect(),
-            new zombie(),
-            new playerDeath(),
-            new GUIListener(),
-            new click(),
-            new openClose()
+                new interaction(),
+                new playerConnect(),
+                new zombie(),
+                new playerDeath(),
+                new GUIListener(),
+                new click(),
+                new openClose()
         );
 
         this.getCommand("TheHordes").setExecutor(new CommandManager());
         this.getCommand("TheHordes").setTabCompleter(new CommandManager());
-
 
     }
 

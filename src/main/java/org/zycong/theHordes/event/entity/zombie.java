@@ -9,7 +9,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 
 import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 
-import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.*;
+import static org.zycong.theHordes.helpers.PDCHelper.*;
 
 public class zombie implements Listener {
     @EventHandler

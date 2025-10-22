@@ -11,7 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 
 import static org.zycong.theHordes.helpers.ColorUtils.colorize;
-import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.setItemPDC;
+import static org.zycong.theHordes.helpers.PDCHelper.setItemPDC;
 
 public class playerDeath implements Listener {
     @EventHandler
@@ -22,11 +22,13 @@ public class playerDeath implements Listener {
     void playerRespawnEvent(PlayerRespawnEvent event){
         event.getPlayer().setGameMode(GameMode.ADVENTURE);
         event.getPlayer().getInventory().clear();
+
         ItemStack startGame = new ItemStack(Material.LIME_CONCRETE, 1);
         ItemMeta meta = startGame.getItemMeta();
-        meta.setDisplayName(colorize("&aStart game!", '&'));
+        meta.setDisplayName(colorize("&r&aStart game!", '&'));
         startGame.setItemMeta(meta);
         setItemPDC("events", startGame, "startGame");
+
         event.getPlayer().getInventory().setItem(8, startGame);
         event.getPlayer().performCommand("spawn");
     }

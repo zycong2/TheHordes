@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 
 import static org.zycong.theHordes.helpers.ColorUtils.colorize;
-import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.*;
+import static org.zycong.theHordes.helpers.PDCHelper.*;
 
 public class playerConnect implements Listener {
     @EventHandler

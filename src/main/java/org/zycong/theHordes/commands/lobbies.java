@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 import org.zycong.theHordes.helpers.commandHelper.CommandHandler;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
 import org.zycong.theHordes.TheHordes;
@@ -77,13 +78,21 @@ public class lobbies implements CommandHandler {
                 return true;
             }
         }
+        else if (args[0].equalsIgnoreCase("reset")){
+            if (args.length == 2){
+                lobbyManager.resetMap(args[1]);
+            }else{
+                p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.noArgs").toString()));
+                return true;
+            }
+        }
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
         if (args.length == 1){
-            return List.of("create", "delete", "setMap", "spawnPoint");
+            return List.of("create", "delete", "setMap", "spawnPoint", "reset");
         } else if (args.length == 2){
             if (args[0].equals("delete") || args[0].equals("setMap") || args[0].equals("spawnPoint")){
                 List<String> lobbiesss = new ArrayList<>();

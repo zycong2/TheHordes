@@ -19,100 +19,126 @@ import static org.zycong.theHordes.TheHordes.Colorize;
 
 public class CommandManager implements CommandExecutor, TabCompleter {
 
-    @Override
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        Player p = (Player) commandSender;
-        if (args.length == 0){
-            p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.noArgs").toString()));
-            return true;
-        } if (!p.hasPermission("TheHordes.Command")){
-            p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.noPermission").toString()));
-            return true;
-        }
+    private final Map<String, CommandHandler> commandHandlers = new HashMap<>();
+    private final List<String> commandNames = new ArrayList<>();
+    private boolean initialized = false;
 
+    private void initializeHandlers() {
+        if (initialized) return;
 
         Reflections reflections = new Reflections("org.zycong.theHordes.commands");
-
         Set<Class<? extends CommandHandler>> classes = reflections.getSubTypesOf(CommandHandler.class);
 
         for (Class<? extends CommandHandler> clazz : classes) {
             try {
                 CommandHandler instance = clazz.getDeclaredConstructor().newInstance();
+                String commandName = makeCommandName(clazz.getName());
 
-                String commandToExecute = args[0];
-                String[] newArgs = new String[args.length-1];
-                int j = 0;
-                for (String arg : args) {
-                    if (!arg.equals(args[0])) {
-                        newArgs[j] = arg;
-                        j++;
-                    }
-                }
-                if (makeCommandName(instance.getClass().getName()).equals(commandToExecute)) {
-                    instance.onCommand(commandSender, command, s, newArgs);
-                }
+                commandHandlers.put(commandName, instance);
+                commandNames.add(commandName);
 
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                     NoSuchMethodException e) {
-                throw new RuntimeException(e);
+            } catch (InstantiationException | NoSuchMethodException |
+                     InvocationTargetException | IllegalAccessException e) {
+                // Log error but don't crash - use logger if available, otherwise print to console
+                System.err.println("Failed to initialize command handler for " + clazz.getName() + ": " + e.getMessage());
             }
-
         }
+        initialized = true;
+    }
+
+    // Call this method from your plugin's onEnable() to pre-initialize
+    public void initialize() {
+        initializeHandlers();
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        Player p = (Player) commandSender;
+
+        // Lazy initialization if not already done
+        if (!initialized) {
+            initializeHandlers();
+        }
+
+        if (args.length == 0) {
+            p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.noArgs").toString()));
+            return true;
+        }
+
+        if (!p.hasPermission("TheHordes.Command")) {
+            p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.noPermission").toString()));
+            return true;
+        }
+
+        String commandToExecute = args[0];
+        String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
+
+        CommandHandler handler = commandHandlers.get(commandToExecute);
+        if (handler != null) {
+            handler.onCommand(commandSender, command, s, newArgs);
+        } else {
+            // Command not found - you might want to send an error message here
+            p.sendMessage(Colorize(yamlManager.getInstance().getOption("messages", "command.failed.notFound").toString()));
+        }
+
         return true;
     }
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-        if (args.length == 1){
-            List<String> commands = new ArrayList<>(List.of());
-            Reflections reflections = new Reflections("org.zycong.theHordes.commands");
+        // Lazy initialization if not already done
+        if (!initialized) {
+            initializeHandlers();
+        }
 
-            Set<Class<? extends CommandHandler>> classes = reflections.getSubTypesOf(CommandHandler.class);
+        if (args.length == 1) {
+            // Filter command names based on what the user has typed so far
+            String input = args[0].toLowerCase();
+            if (input.isEmpty()) {
+                return new ArrayList<>(commandNames);
+            }
 
-            for (Class<? extends CommandHandler> clazz : classes) {
-                try{
-                    CommandHandler instance = clazz.getDeclaredConstructor().newInstance();
-                    commands.add(makeCommandName(instance.getClass().getName()));
-                } catch (InstantiationException | NoSuchMethodException | InvocationTargetException |
-                         IllegalAccessException e) {
-                    throw new RuntimeException(e);
+            List<String> completions = new ArrayList<>();
+            for (String cmd : commandNames) {
+                if (cmd.toLowerCase().startsWith(input)) {
+                    completions.add(cmd);
                 }
             }
-            return commands;
-        } else {
-            Reflections reflections = new Reflections("org.zycong.theHordes.commands");
+            return completions;
+        }
 
-            Set<Class<? extends CommandHandler>> classes = reflections.getSubTypesOf(CommandHandler.class);
+        // For sub-command tab completion
+        if (args.length >= 2) {
+            String commandName = args[0];
+            CommandHandler handler = commandHandlers.get(commandName);
 
-            for (Class<? extends CommandHandler> clazz : classes) {
-                try {
-                    CommandHandler instance = clazz.getDeclaredConstructor().newInstance();
-
-                    String commandToExecute = args[0];
-                    String[] newArgs = new String[args.length-1];
-                    int j = 0;
-                    for (String arg : args) {
-                        if (!arg.equals(args[0])) {
-                            newArgs[j] = arg;
-                            j++;
-                        }
-                    }
-                    if (makeCommandName(instance.getClass().getName()).equals(commandToExecute)) {
-                        return instance.onTabComplete(commandSender, command, s, newArgs);
-                    }
-
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                         NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
-
+            if (handler != null) {
+                String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
+                List<String> result = handler.onTabComplete(commandSender, command, s, newArgs);
+                return result != null ? result : List.of();
             }
         }
+
         return List.of();
     }
 
-    private String makeCommandName(String input){
+    private String makeCommandName(String input) {
         return input.replace("org.zycong.theHordes.commands.", "");
     }
-}
 
+    // Method to reload command handlers if needed (for plugin reloads)
+    public void reload() {
+        commandHandlers.clear();
+        commandNames.clear();
+        initialized = false;
+        initializeHandlers();
+    }
+
+    // Utility method to get all registered command names (optional)
+    public List<String> getCommandNames() {
+        if (!initialized) {
+            initializeHandlers();
+        }
+        return new ArrayList<>(commandNames);
+    }
+}

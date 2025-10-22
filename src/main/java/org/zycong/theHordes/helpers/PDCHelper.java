@@ -1,4 +1,4 @@
-package org.zycong.theHordes.helpers.PDCHelper;
+package org.zycong.theHordes.helpers;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;

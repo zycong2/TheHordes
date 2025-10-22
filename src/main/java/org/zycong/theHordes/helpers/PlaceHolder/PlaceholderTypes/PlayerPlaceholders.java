@@ -6,10 +6,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.zycong.theHordes.helpers.PlaceHolder.PlaceholderUtils.Placeholder;
+import org.zycong.theHordes.helpers.economy;
 
 import static org.zycong.theHordes.TheHordes.ColorizeReString;
 import static org.zycong.theHordes.TheHordes.IsLuckperms;
-import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.*;
+import static org.zycong.theHordes.helpers.PDCHelper.*;
 import static org.bukkit.Bukkit.getServer;
 
 public class PlayerPlaceholders {
@@ -99,6 +100,14 @@ public class PlayerPlaceholders {
       return ColorizeReString("The mob is not a living entity");
     }
   }
+
+  /*@Placeholder(name = "balance")
+  public static double balance(Entity e){
+    if (e instanceof Player p) {
+      return economy.getBalance(p);
+    }
+    return 0d;
+  }*/
 
   // Add more methods and they'll auto-register!
 }

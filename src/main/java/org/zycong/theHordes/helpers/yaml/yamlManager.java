@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.zycong.theHordes.TheHordes;
 import org.zycong.theHordes.helpers.GUI.GUI.GUIItem;
-import org.zycong.theHordes.helpers.PDCHelper.PDCHelper;
+import org.zycong.theHordes.helpers.PDCHelper;
 import org.zycong.theHordes.helpers.Traders.MobNPC;
 
 import java.io.File;

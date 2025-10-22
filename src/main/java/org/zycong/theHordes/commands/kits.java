@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.zycong.theHordes.TheHordes;
-import org.zycong.theHordes.helpers.PDCHelper.PDCHelper;
+import org.zycong.theHordes.helpers.PDCHelper;
 import org.zycong.theHordes.helpers.commandHelper.CommandHandler;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
 
@@ -68,6 +68,11 @@ public class kits implements CommandHandler {
     }
 
     void openKitEditor(String kit, Player p){
+
+
+
+
+
         List<ItemStack> kits = (List<ItemStack>) yamlManager.getInstance().getOption("kits", kit + ".items");
 
         Inventory inv = Bukkit.createInventory(p, 36, "Kit Editor");

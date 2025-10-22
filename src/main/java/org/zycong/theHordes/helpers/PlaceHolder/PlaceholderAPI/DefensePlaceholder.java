@@ -5,7 +5,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import static org.zycong.theHordes.helpers.PDCHelper.PDCHelper.*;
+import static org.zycong.theHordes.helpers.PDCHelper.*;
 
 public class DefensePlaceholder extends PlaceholderExpansion {
   @Override
@@ -15,7 +15,7 @@ public class DefensePlaceholder extends PlaceholderExpansion {
 
   @Override
   public @NotNull String getAuthor() {
-    return "Tonnam_101";
+    return "zycong, Tonnam_101";
   }
 
   @Override

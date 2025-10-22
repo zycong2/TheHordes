@@ -6,13 +6,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.zycong.theHordes.TheHordes;
-import org.zycong.theHordes.helpers.PDCHelper.PDCHelper;
+import org.zycong.theHordes.helpers.PDCHelper;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
 
 import java.time.Duration;
@@ -64,8 +65,6 @@ public class lobbyManager {
 
     static void spawnZombies(List<String> l) {
         try {
-
-
             String lobby = l.get(0).toString();
 
             int difficulty = Integer.parseInt(l.get(1).toString()) + 1;
@@ -105,13 +104,19 @@ public class lobbyManager {
                 }
             }
             Bukkit.getLogger().info("spawneding max " + maxSpawns + " zombies spawnlocations: " + spawnLocations.size());
-            for (int i = 0; i < maxSpawns; i++) {
+            for (int i = 0; i < maxSpawns + 1; i++) {
                 Random rand = new Random();
                 Entity entity = spawnLocations.get(0).getWorld().spawnEntity(spawnLocations.get(rand.nextInt(spawnLocations.size())), EntityType.ZOMBIE);
-                Bukkit.getLogger().info("spawned 1 zombie");
+                entity.setCustomNameVisible(false);
+                entity.setCustomName("zombie lvl " + waves);
+                LivingEntity le = (LivingEntity) entity;
+                le.setMaxHealth(20 + waves);
+                le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue() + 0.1*difficulty);
+
+
             }
             yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", true);
-            yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns);
+            yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns -1);
         } catch (NullPointerException exeption) {
             games.remove(l);
         }
@@ -148,6 +153,8 @@ public class lobbyManager {
                         Location loc = TheHordes.stringToLocation((String) yamlManager.getInstance().getOption("lobbies", o + ".location"));
                         p.teleport(loc);
                         p.setGameMode(GameMode.ADVENTURE);
+                        p.setHealth(20);
+                        p.setFoodLevel(20);
                         if (newPlayers.size() == 1) {
                             try {
                                 timers.get(lNumber).progress(BossBar.MAX_PROGRESS);
@@ -261,7 +268,7 @@ public class lobbyManager {
                     Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))
             ));
             yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", false);
-            yamlManager.getInstance().setOption("lobbies", lobby + ".killed", 0);
+            yamlManager.getInstance().setOption("lobbies", lobby + ".killed", null);
         }
     }
 
