@@ -1,5 +1,6 @@
 package org.zycong.theHordes.event.GUI;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,6 +19,9 @@ public class click implements Listener {
                  case "kitSelector" : {
                     kits.selectorUsed(event);
                      event.setCancelled(true);
+                }
+                case "kitsEditor" : {
+                    kits.editorUsed(event);
                 }
             }
         }

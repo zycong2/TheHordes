@@ -111,7 +111,8 @@ public class lobbyManager {
                 entity.setCustomName("zombie lvl " + waves);
                 LivingEntity le = (LivingEntity) entity;
                 le.setMaxHealth(20 + waves);
-                le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue() + 0.1*difficulty);
+                le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue() + difficulty);
+                le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getValue() + difficulty*0.005);
 
 
             }
@@ -299,6 +300,18 @@ public class lobbyManager {
         yamlManager.getInstance().setOption("lobbies", o + ".zombieCount", null);
         yamlManager.getInstance().setOption("lobbies", o + ".spawnedAllZombies", null);
         yamlManager.getInstance().setOption("lobbies", o + ".wave", null);
+        List<String> spawnLocationsString = (List<String>) yamlManager.getInstance().getOption("lobbies", o + ".map.spawnLoc");
+
+        List<Location> spawnLocations = new ArrayList<>();
+        for (String s : spawnLocationsString) {
+            spawnLocations.add(TheHordes.stringToLocation(s));
+        }
+        for (Entity e : spawnLocations.get(0).getWorld().getEntities()){
+            if (e.getType() == EntityType.ZOMBIE){
+                LivingEntity le = (LivingEntity) e;
+                le.setHealth(0);
+            }
+        }
 
     }
 }

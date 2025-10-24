@@ -1,5 +1,6 @@
 package org.zycong.theHordes.commands;
 
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -7,12 +8,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.zycong.theHordes.TheHordes;
+import org.zycong.theHordes.helpers.ColorUtils;
 import org.zycong.theHordes.helpers.PDCHelper;
 import org.zycong.theHordes.helpers.commandHelper.CommandHandler;
 import org.zycong.theHordes.helpers.yaml.yamlManager;
@@ -55,7 +56,7 @@ public class kits implements CommandHandler {
         if (args.length == 1){
             return List.of("create", "edit", "delete");
         } if (args.length == 2){
-            if (args[1].equalsIgnoreCase("edit") || args[1].equalsIgnoreCase("delete")){
+            if (args[0].equalsIgnoreCase("edit") || args[0].equalsIgnoreCase("delete")){
                 List<Object> obs = yamlManager.getInstance().getNodes("kits", "");
                 List<String> arg = new ArrayList<>();
                 for (Object o : obs){
@@ -67,17 +68,103 @@ public class kits implements CommandHandler {
         return List.of();
     }
 
-    void openKitEditor(String kit, Player p){
-
-
-
-
-
-        List<ItemStack> kits = (List<ItemStack>) yamlManager.getInstance().getOption("kits", kit + ".items");
+    static void openKitEditor(String kit, Player p){
+        if (yamlManager.getInstance().getOption("kits", kit + ".icon") == null){
+            return;
+        }
 
         Inventory inv = Bukkit.createInventory(p, 36, "Kit Editor");
-        for (ItemStack i : kits){
-            inv.addItem(i);
+
+        ItemStack cost = new ItemStack(Material.EXPERIENCE_BOTTLE);
+        ItemMeta meta1 = cost.getItemMeta();
+        meta1.displayName(ColorUtils.convertToComponent("Kit cost in xp levels"));
+        if (yamlManager.getInstance().getOption("kits", kit + ".price") != null) {
+            meta1.setLore(List.of("Price: " + yamlManager.getInstance().getOption("kits", kit + ".price")));
+        }
+        cost.setItemMeta(meta1);
+        inv.setItem(4, cost);
+
+        ItemStack name = new ItemStack(Material.NAME_TAG);
+        ItemMeta meta2 = name.getItemMeta();
+        meta2.displayName(ColorUtils.convertToComponent("Kit Name"));
+        name.setItemMeta(meta2);
+        inv.setItem(20, name);
+
+        ItemStack items = new ItemStack(Material.CHEST);
+        meta2 = items.getItemMeta();
+        meta2.displayName(ColorUtils.convertToComponent("Kit Items"));
+        items.setItemMeta(meta2);
+        inv.setItem(22, items);
+
+        ItemStack logo = (ItemStack) yamlManager.getInstance().getOption("kits", kit + ".icon");
+        meta2 = items.getItemMeta();
+        meta2.displayName(ColorUtils.convertToComponent("Kit Item"));
+        meta2.setLore(List.of("&rDrop items on the button to change the display item."));
+        items.setItemMeta(meta2);
+        inv.setItem(24, logo);
+
+        p.openInventory(inv);
+        p.setMetadata("inventory", new FixedMetadataValue(TheHordes.getPlugin(), "kitsEditor"));
+        p.setMetadata("kit", new FixedMetadataValue(TheHordes.getPlugin(), kit));
+    }
+
+    public static void editorUsed(InventoryClickEvent e){
+
+        if (e.getRawSlot() == 22){
+            openKitsItemSelector(e.getWhoClicked().getMetadata("kit").get(0).asString() , (Player) e.getWhoClicked());
+            e.setCancelled(true);
+        } else if (e.getRawSlot() == 4){
+            e.getWhoClicked().closeInventory();
+            e.getWhoClicked().sendMessage(Colorize("&aPlease send the price of the kit in chat."));
+            e.getWhoClicked().setMetadata("GUIinput", new FixedMetadataValue(TheHordes.getPlugin(), "kitPrice"));
+            e.setCancelled(true);
+        } else if (e.getRawSlot() == 20){
+            e.getWhoClicked().closeInventory();
+            e.getWhoClicked().sendMessage(Colorize("&aPlease send the new name of the kit in chat."));
+            e.getWhoClicked().setMetadata("GUIinput", new FixedMetadataValue(TheHordes.getPlugin(), "kitName"));
+            e.setCancelled(true);
+        } else if (e.getRawSlot() == 24){
+            e.getWhoClicked().getItemOnCursor();
+            String kit = e.getWhoClicked().getMetadata("kit").get(0).asString();
+            yamlManager.getInstance().setOption("kits", kit + ".icon", e.getWhoClicked().getItemOnCursor());
+            e.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
+            e.getWhoClicked().closeInventory();
+            e.setCancelled(true);
+        }
+    }
+
+    public static void setPrice(String message, Player p){
+        try{
+            int amount = Integer.parseInt(message);
+            String kit = p.getMetadata("kit").get(0).asString();
+
+            yamlManager.getInstance().setOption("kits", kit + ".price", amount);
+            p.setMetadata("GUIinput", new FixedMetadataValue(TheHordes.getPlugin(), null));
+            p.sendMessage(Colorize("&aSuccesufly set new price."));
+
+        }
+        catch (NumberFormatException e){
+            p.sendMessage(Colorize("&cPlease only send a number!"));
+        }
+    }
+
+    public static void setName(String name, Player p){
+        String kit = p.getMetadata("kit").get(0).asString();
+
+        yamlManager.getInstance().changeRoot("kits", kit, String.valueOf(name));
+        p.setMetadata("GUIinput", new FixedMetadataValue(TheHordes.getPlugin(), null));
+        p.sendMessage(Colorize("&aSuccesufly set new name."));
+
+    }
+
+    static void openKitsItemSelector(String kit, Player p){
+        Inventory inv = Bukkit.createInventory(p, 36, "Kit Item Editor");
+
+        if (yamlManager.getInstance().getOption("kits", kit + ".items") != null) {
+            List<ItemStack> kits = (List<ItemStack>) yamlManager.getInstance().getOption("kits", kit + ".items");
+            for (ItemStack i : kits) {
+                inv.addItem(i);
+            }
         }
         p.openInventory(inv);
         p.setMetadata("inventory", new FixedMetadataValue(TheHordes.getPlugin(), "kitEditor"));

@@ -1,5 +1,9 @@
 package org.zycong.theHordes.event.player;
 
+import com.destroystokyo.paper.event.block.AnvilDamagedEvent;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -7,11 +11,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
+import org.w3c.dom.Text;
 import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 import org.zycong.theHordes.commands.kits;
 
@@ -49,5 +55,30 @@ public class interaction implements Listener {
     @EventHandler
     void onItemDamage(PlayerItemDamageEvent event){
         event.setCancelled(true);
+    }
+    @EventHandler
+    void onAnvilDamage(AnvilDamagedEvent event){
+        event.setCancelled(true);
+    }
+    @EventHandler
+    void onCraft(CraftItemEvent event){
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    void onChat(AsyncChatEvent event){
+        Player p = event.getPlayer();
+        if (!p.hasMetadata("GUIinput")) { return;}
+        event.setCancelled(true);
+        switch (p.getMetadata("GUIinput").get(0).asString())  {
+            case ("kitPrice") : {
+                TextComponent m = (TextComponent) event.message();
+                kits.setPrice(m.content(), event.getPlayer());
+            }
+            case ("kitName") : {
+                TextComponent m = (TextComponent) event.message();
+                kits.setName(m.content(), event.getPlayer());
+            }
+        }
     }
 }

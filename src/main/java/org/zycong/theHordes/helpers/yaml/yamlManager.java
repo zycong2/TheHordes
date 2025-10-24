@@ -347,4 +347,23 @@ public class yamlManager {
         }
         return false;
     }
+
+    public void changeRoot(String file, String path, String newRootName){
+        if (getFileConfig(file).get(path) == null){ return; }
+        Object data = getFileConfig(file).get(path);
+        List<Object> options = getNodes(file, path);
+        HashMap<Object, Object> values = new HashMap<>();
+
+        for (Object o : options){
+            values.put(o, getOption(file, path + "." + o));
+        }
+
+        setOption(file, path, null);
+
+        if (newRootName != null) {
+            values.forEach((k, v) -> setOption(file, newRootName + "." + k, v));
+        } else{
+            values.forEach((k, v) -> setOption(file, k.toString(), v));
+        }
+    }
 }

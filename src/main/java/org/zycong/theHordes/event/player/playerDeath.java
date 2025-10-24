@@ -2,8 +2,12 @@ package org.zycong.theHordes.event.player;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -31,5 +35,11 @@ public class playerDeath implements Listener {
 
         event.getPlayer().getInventory().setItem(8, startGame);
         event.getPlayer().performCommand("spawn");
+    }
+    @EventHandler
+    public void onHit(EntityDamageByEntityEvent e) {
+        if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
+            e.setCancelled(true);
+        }
     }
 }
