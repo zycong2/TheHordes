@@ -288,30 +288,31 @@ public class lobbyManager {
     }
 
     public static void resetMap(String o){
-        int currentCount = 0;
-        List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
-        for (Object ob : lobbies) {
-            if (ob.toString().equals(o)){
-                games.remove(List.of(o, yamlManager.getInstance().getOption("lobbies", o + ".wave")));
+        try {
+            int currentCount = 0;
+            List<Object> lobbies = yamlManager.getInstance().getNodes("lobbies", "");
+            for (Object ob : lobbies) {
+                if (ob.toString().equals(o)) {
+                    games.remove(List.of(o, yamlManager.getInstance().getOption("lobbies", o + ".wave")));
+                }
             }
-        }
-        yamlManager.getInstance().setOption("lobbies", o + ".players", List.of());
-        yamlManager.getInstance().setOption("lobbies", o + ".killed", null);
-        yamlManager.getInstance().setOption("lobbies", o + ".zombieCount", null);
-        yamlManager.getInstance().setOption("lobbies", o + ".spawnedAllZombies", null);
-        yamlManager.getInstance().setOption("lobbies", o + ".wave", null);
-        List<String> spawnLocationsString = (List<String>) yamlManager.getInstance().getOption("lobbies", o + ".map.spawnLoc");
+            yamlManager.getInstance().setOption("lobbies", o + ".players", List.of());
+            yamlManager.getInstance().setOption("lobbies", o + ".killed", null);
+            yamlManager.getInstance().setOption("lobbies", o + ".zombieCount", null);
+            yamlManager.getInstance().setOption("lobbies", o + ".spawnedAllZombies", null);
+            yamlManager.getInstance().setOption("lobbies", o + ".wave", null);
+            List<String> spawnLocationsString = (List<String>) yamlManager.getInstance().getOption("lobbies", o + ".map.spawnLoc");
 
-        List<Location> spawnLocations = new ArrayList<>();
-        for (String s : spawnLocationsString) {
-            spawnLocations.add(TheHordes.stringToLocation(s));
-        }
-        for (Entity e : spawnLocations.get(0).getWorld().getEntities()){
-            if (e.getType() == EntityType.ZOMBIE){
-                LivingEntity le = (LivingEntity) e;
-                le.setHealth(0);
+            List<Location> spawnLocations = new ArrayList<>();
+            for (String s : spawnLocationsString) {
+                spawnLocations.add(TheHordes.stringToLocation(s));
             }
-        }
-
+            for (Entity e : spawnLocations.get(0).getWorld().getEntities()) {
+                if (e.getType() == EntityType.ZOMBIE) {
+                    LivingEntity le = (LivingEntity) e;
+                    le.setHealth(0);
+                }
+            }
+        } catch (NullPointerException ignored) { }
     }
 }

@@ -1,4 +1,4 @@
-package org.zycong.theHordes.event.GUI;
+package org.zycong.theHordes.event.player.GUI;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +17,7 @@ public class openClose implements Listener {
             switch(inventory){
                 case "kitEditor" : {
                     kits.InventoryClose(event);
+                    break;
                 }
             }
             p.removeMetadata("inventory", TheHordes.getPlugin());

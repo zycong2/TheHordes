@@ -77,29 +77,29 @@ public class kits implements CommandHandler {
 
         ItemStack cost = new ItemStack(Material.EXPERIENCE_BOTTLE);
         ItemMeta meta1 = cost.getItemMeta();
-        meta1.displayName(ColorUtils.convertToComponent("Kit cost in xp levels"));
+        meta1.displayName(ColorUtils.convertToComponent("&r&fKit cost in xp levels"));
         if (yamlManager.getInstance().getOption("kits", kit + ".price") != null) {
-            meta1.setLore(List.of("Price: " + yamlManager.getInstance().getOption("kits", kit + ".price")));
+            meta1.lore(List.of(Colorize("&r&fPrice: " + yamlManager.getInstance().getOption("kits", kit + ".price"))));
         }
         cost.setItemMeta(meta1);
         inv.setItem(4, cost);
 
         ItemStack name = new ItemStack(Material.NAME_TAG);
         ItemMeta meta2 = name.getItemMeta();
-        meta2.displayName(ColorUtils.convertToComponent("Kit Name"));
+        meta2.displayName(ColorUtils.convertToComponent("&r&fKit Name"));
         name.setItemMeta(meta2);
         inv.setItem(20, name);
 
         ItemStack items = new ItemStack(Material.CHEST);
         meta2 = items.getItemMeta();
-        meta2.displayName(ColorUtils.convertToComponent("Kit Items"));
+        meta2.displayName(ColorUtils.convertToComponent("&r&fKit Items"));
         items.setItemMeta(meta2);
         inv.setItem(22, items);
 
         ItemStack logo = (ItemStack) yamlManager.getInstance().getOption("kits", kit + ".icon");
         meta2 = items.getItemMeta();
         meta2.displayName(ColorUtils.convertToComponent("Kit Item"));
-        meta2.setLore(List.of("&rDrop items on the button to change the display item."));
+        meta2.lore(List.of(Colorize("&rDrop items on the button to change the display item.")));
         items.setItemMeta(meta2);
         inv.setItem(24, logo);
 
@@ -109,14 +109,16 @@ public class kits implements CommandHandler {
     }
 
     public static void editorUsed(InventoryClickEvent e){
-
+        if (e.getRawSlot() == 22 || e.getRawSlot() == 4 || e.getRawSlot() == 20 || e.getRawSlot() == 24){
+            e.getWhoClicked().removeMetadata("inventory", TheHordes.getPlugin());
+        }
         if (e.getRawSlot() == 22){
-            openKitsItemSelector(e.getWhoClicked().getMetadata("kit").get(0).asString() , (Player) e.getWhoClicked());
             e.setCancelled(true);
+            openKitsItemSelector(e.getWhoClicked().getMetadata("kit").get(0).asString() , (Player) e.getWhoClicked());
         } else if (e.getRawSlot() == 4){
-            e.getWhoClicked().closeInventory();
             e.getWhoClicked().sendMessage(Colorize("&aPlease send the price of the kit in chat."));
             e.getWhoClicked().setMetadata("GUIinput", new FixedMetadataValue(TheHordes.getPlugin(), "kitPrice"));
+            e.getWhoClicked().closeInventory();
             e.setCancelled(true);
         } else if (e.getRawSlot() == 20){
             e.getWhoClicked().closeInventory();
@@ -124,7 +126,7 @@ public class kits implements CommandHandler {
             e.getWhoClicked().setMetadata("GUIinput", new FixedMetadataValue(TheHordes.getPlugin(), "kitName"));
             e.setCancelled(true);
         } else if (e.getRawSlot() == 24){
-            e.getWhoClicked().getItemOnCursor();
+            if (e.getWhoClicked().getItemOnCursor().equals(new ItemStack(Material.AIR))) { return; }
             String kit = e.getWhoClicked().getMetadata("kit").get(0).asString();
             yamlManager.getInstance().setOption("kits", kit + ".icon", e.getWhoClicked().getItemOnCursor());
             e.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
@@ -146,6 +148,7 @@ public class kits implements CommandHandler {
         catch (NumberFormatException e){
             p.sendMessage(Colorize("&cPlease only send a number!"));
         }
+        p.removeMetadata("inventory", TheHordes.getPlugin());
     }
 
     public static void setName(String name, Player p){
@@ -154,6 +157,8 @@ public class kits implements CommandHandler {
         yamlManager.getInstance().changeRoot("kits", kit, String.valueOf(name));
         p.setMetadata("GUIinput", new FixedMetadataValue(TheHordes.getPlugin(), null));
         p.sendMessage(Colorize("&aSuccesufly set new name."));
+        p.removeMetadata("inventory", TheHordes.getPlugin());
+        p.removeMetadata("kit", TheHordes.getPlugin());
 
     }
 
@@ -191,28 +196,111 @@ public class kits implements CommandHandler {
         Inventory selector = Bukkit.createInventory(p, 36, "Kits Selector");
 
         for (Object o : yamlManager.getInstance().getNodes("kits", "")){
+            List<TextComponent> lore = new ArrayList<>(List.of());
             ItemStack item = (ItemStack) yamlManager.getInstance().getOption("kits", o + ".icon");
             ItemMeta meta = item.getItemMeta();
             meta.displayName(Colorize("&f" + o.toString()));
+
+            if (playerHasKit(p, o.toString() )){
+                lore.add(Colorize("&aPurchased"));
+            }
+            else {
+                lore.add(Colorize("&cNot purchased"));
+                lore.add(Colorize("&fPrice: " + yamlManager.getInstance().getOption("kits", o + ".price")));
+            }
+
+            meta.lore(lore);
             item.setItemMeta(meta);
             selector.addItem(item);
         }
         p.openInventory(selector);
         p.setMetadata("inventory", new FixedMetadataValue(TheHordes.getPlugin(), "kitSelector"));
     }
+
     public static void selectorUsed(InventoryClickEvent event){
         Player p =(Player) event.getWhoClicked();
         int selected = event.getRawSlot();
         int count = 0;
         for (Object o : yamlManager.getInstance().getNodes("kits", "")){
             if (count == selected){
-                PDCHelper.setPlayerPDC("selectedKit", p, o.toString());
-                p.removeMetadata("inventory", TheHordes.getPlugin());
-                p.closeInventory();
-                return;
+                if (playerHasKit(p, o.toString())) {
+                    PDCHelper.setPlayerPDC("selectedKit", p, o.toString());
+                    p.removeMetadata("inventory", TheHordes.getPlugin());
+                    p.closeInventory();
+                    return;
+                } else {
+                    event.setCancelled(true);
+                    buyKit(p, o.toString());
+                }
             }
             count ++;
         }
+    }
 
+    static boolean playerHasKit(Player p, String kit){
+        if (PDCHelper.getPlayerPDC("boughtKits", p) == null){
+            return yamlManager.getInstance().getOption("kits", kit + ".price") == null || (int) yamlManager.getInstance().getOption("kits", kit + ".price") == 0;
+        } if(PDCHelper.getPlayerPDC("boughtKits", p).contains(kit)) {
+            return true;
+        } else {
+            return yamlManager.getInstance().getOption("kits", kit + ".price") == null;
+        }
+    }
+
+    static void buyKit(Player p, String kit){
+        if (PDCHelper.getPlayerPDC("boughtKits", p) != null) {
+            if (PDCHelper.getPlayerPDC("boughtKits", p).contains(kit)) {
+                return;
+            }
+        }
+
+        Inventory inv = Bukkit.createInventory(p, 27, "Do you want to buy the " + kit+ " kit?");
+
+
+        ItemStack cancel = new ItemStack(Material.RED_CONCRETE);
+        ItemMeta meta = cancel.getItemMeta();
+        meta.displayName(Colorize("&cCancel"));
+        cancel.setItemMeta(meta);
+        inv.setItem(12, cancel);
+
+        ItemStack buy = new ItemStack(Material.LIME_CONCRETE);
+        meta = buy.getItemMeta();
+        meta.displayName(Colorize("&aBuy for " + yamlManager.getInstance().getOption("kits", kit + ".price")));
+        buy.setItemMeta(meta);
+        inv.setItem(14, buy);
+
+        p.openInventory(inv);
+        p.setMetadata("inventory", new FixedMetadataValue(TheHordes.getPlugin(), "buyKit"));
+        p.setMetadata("kit", new FixedMetadataValue(TheHordes.getPlugin(), kit));
+    }
+
+    public static void boughtGUIUsed(InventoryClickEvent e){
+        if (e.getRawSlot() == 12){ openSelector((Player) e.getWhoClicked());}
+        else if (e.getRawSlot() == 14){
+            Player p = (Player) e.getWhoClicked();
+            String kit = p.getMetadata("kit").get(0).asString();
+            if (p.getLevel() >=  (int)yamlManager.getInstance().getOption("kits", kit + ".price")){
+                p.setLevel(p.getLevel() - (int)yamlManager.getInstance().getOption("kits", kit + ".price"));
+
+                String bought = "";
+                if (PDCHelper.getPlayerPDC("boughtKits", p) != null){
+                    bought = PDCHelper.getPlayerPDC("boughtKits", p);
+                }
+                PDCHelper.setPlayerPDC("boughtKits", p, bought + "," + kit);
+
+                p.sendMessage(Colorize("&aYou bought the " + kit + " kit"));
+
+
+                PDCHelper.setPlayerPDC("selectedKit", p, kit);
+                p.removeMetadata("inventory", TheHordes.getPlugin());
+                p.closeInventory();
+            }else {
+                p.sendMessage(Colorize("&cYou don't have enough experience to buy this kit."));
+                p.closeInventory();
+            }
+
+        }
+        e.getWhoClicked().removeMetadata("inventory", TheHordes.getPlugin());
+        e.getWhoClicked().removeMetadata("kit", TheHordes.getPlugin());
     }
 }

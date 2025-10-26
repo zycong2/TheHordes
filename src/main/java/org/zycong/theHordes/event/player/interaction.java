@@ -5,7 +5,6 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,7 +16,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
-import org.w3c.dom.Text;
+import org.zycong.theHordes.TheHordes;
 import org.zycong.theHordes.helpers.Lobby.lobbyManager;
 import org.zycong.theHordes.commands.kits;
 
@@ -74,11 +73,14 @@ public class interaction implements Listener {
             case ("kitPrice") : {
                 TextComponent m = (TextComponent) event.message();
                 kits.setPrice(m.content(), event.getPlayer());
+                break;
             }
             case ("kitName") : {
                 TextComponent m = (TextComponent) event.message();
                 kits.setName(m.content(), event.getPlayer());
+                break;
             }
         }
+        p.removeMetadata("GUIinput", TheHordes.getPlugin());
     }
 }

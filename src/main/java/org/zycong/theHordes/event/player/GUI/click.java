@@ -1,11 +1,10 @@
-package org.zycong.theHordes.event.GUI;
+package org.zycong.theHordes.event.player.GUI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.zycong.theHordes.TheHordes;
 import org.zycong.theHordes.commands.kits;
 
 public class click implements Listener {
@@ -18,10 +17,17 @@ public class click implements Listener {
             switch(inventory){
                  case "kitSelector" : {
                     kits.selectorUsed(event);
-                     event.setCancelled(true);
+                    event.setCancelled(true);
+                     break;
                 }
                 case "kitsEditor" : {
                     kits.editorUsed(event);
+                    break;
+                }
+                case "buyKit" : {
+                    kits.boughtGUIUsed(event);
+                    event.setCancelled(true);
+                    break;
                 }
             }
         }
