@@ -29,6 +29,10 @@ public class click implements Listener {
                     event.setCancelled(true);
                     break;
                 }
+                case "upgradeEditor"{
+                    upgrades.editorUsed(event);
+                    break;
+                }
             }
         }
     }
