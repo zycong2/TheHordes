@@ -40,7 +40,8 @@ public class kits implements CommandHandler {
             if (args.length == 2){
                 yamlManager.getInstance().setOption("kits", args[1] + ".items", List.of());
                 yamlManager.getInstance().setOption("kits", args[1] + ".icon", new ItemStack(Material.DIRT));
-                yamlManager.getInstance().setOptions("kits", args[1] + ".upgrades", List.of());
+                yamlManager.getInstance().setOptions("kits", args[1] + ".upgrades.1.item", new ItemStack(Material.DIRT));
+                amlManager.getInstance().setOptions("kits", args[1] + ".upgrades.1.cost", 10);
                 openKitEditor(args[1], p);
             }
         }
