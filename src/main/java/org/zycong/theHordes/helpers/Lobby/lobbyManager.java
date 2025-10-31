@@ -192,7 +192,6 @@ public class lobbyManager {
             if (currentCount == count) {
                 Location loc = TheHordes.stringToLocation((String) yamlManager.getInstance().getOption("lobbies", o + ".map.location"));
                 List playerObjects = (List) yamlManager.getInstance().getOption("lobbies", o + ".players");
-                List<Player> players = new ArrayList<>();
                 for (Object ob : playerObjects){
                     if (ob instanceof Player p){
                         p.teleport(loc);
@@ -212,9 +211,6 @@ public class lobbyManager {
                 }else {
                     games.add(List.of(o.toString(), String.valueOf(count)));
                 }
-
-
-
             }
             currentCount ++;
         }
