@@ -1,43 +1,65 @@
 package org.zycong.theHordes.commands;
 
-public class updates implements command {
+import org.bukkit.Material;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.zycong.theHordes.TheHordes;
+import org.zycong.theHordes.helpers.commandHelper.CommandHandler;
+import org.zycong.theHordes.helpers.yaml.yamlManager;
+
+import java.util.List;
+
+public class upgrades implements CommandHandler {
   @Override
   public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args){ //format /th upgrades <kitname> <edit>
-    Player p = (Player) CommandSender;
+    Player p = (Player) commandSender;
 
     switch (args[1]){
       case ("edit") : {
         openEditor(p, args[0]);
       }
     }
+    return true;
+  }
+
+  @Override
+  public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
+    return List.of();
   }
 
   void openEditor(Player p, String kit){
-    Inventory inv = Bukkit.CreateInventory(p, 27, "Upgrade editor of " + kit);
-    List<String> upgradeOptions = (List)yamlManager.getInstance().getNodes("kits", kit + ".upgrades");
+    Inventory inv = Bukkit.createInventory(p, 27, "Upgrade editor of " + kit);
+    List<String> upgradeOptions = (List) yamlManager.getInstance().getNodes("kits", kit + ".upgrades");
     for (String s : upgradeOptions){
       inv.addItem((ItemStack)yamlManager.getInstance().getOption("kit", kit + ".upgrades." + s + ".item"));
     }    
     p.openInventory(inv);
-    p.setMetaData("inventory", new FixedMetaData(THeHordes.getPlugin(), "upgradeEditor"));
-    p.setMetaData("kit", new FixedMetaData(TheHordes.getPlugin(), kit))
+    p.setMetadata("inventory", new FixedMetadataValue(TheHordes.getPlugin(), "upgradeEditor"));
+    p.setMetadata("kit", new FixedMetadataValue(TheHordes.getPlugin(), kit));
   }
 
-  public void editorUsed(InventoryClickEvent e){
+  public static void editorUsed(InventoryClickEvent e){
     if (e.getCurrentItem().getType().equals(Material.AIR)){
+      e.setCancelled(true);
       return; //later add drag to add new upgrades
-      e.setCanceled(true);
+
     }
+    String kit = e.getWhoClicked().getMetadata("kit").get(0).asString();
     List<String> upgradeOptions = (List)yamlManager.getInstance().getNodes("kits", kit + ".upgrades");
-    String kit = e.getWhoClicked().getMetaData("kit").get(0).asString();
     for (String s : upgradeOptions){
-      if ((ItemStack)yamlManager.getInstance().getOption("kit", kit + ".upgrades." + s + ".item").equals(e.getCurrentItem())){
-        createEditorForItem(e.getWhoClicked(), kit);
+      if ((ItemStack)yamlManager.getInstance().getOption("kit", kit + ".upgrades." + s + ".item") == e.getCurrentItem()){
+        createEditorForItem((Player) e.getWhoClicked(), kit);
       }
     }
   }
 
-  public void createEditorForItem(Player p, String kit){
+  public static void createEditorForItem(Player p, String kit){
     
   }
 }

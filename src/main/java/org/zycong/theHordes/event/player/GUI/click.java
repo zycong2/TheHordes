@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.zycong.theHordes.commands.kits;
+import org.zycong.theHordes.commands.upgrades;
 
 public class click implements Listener {
     @EventHandler
@@ -29,7 +30,7 @@ public class click implements Listener {
                     event.setCancelled(true);
                     break;
                 }
-                case "upgradeEditor"{
+                case "upgradeEditor" : {
                     upgrades.editorUsed(event);
                     break;
                 }
