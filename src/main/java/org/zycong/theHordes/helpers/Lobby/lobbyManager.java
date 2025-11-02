@@ -109,6 +109,8 @@ public class lobbyManager {
                 Entity entity = spawnLocations.get(0).getWorld().spawnEntity(spawnLocations.get(rand.nextInt(spawnLocations.size())), EntityType.ZOMBIE);
                 entity.setCustomNameVisible(false);
                 entity.setCustomName("zombie lvl " + waves);
+                Zombie zomb = (Zombie) entity;
+                zomb.setAdult();
                 LivingEntity le = (LivingEntity) entity;
                 le.setMaxHealth(20 + waves);
                 le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue() + difficulty);
@@ -256,14 +258,17 @@ public class lobbyManager {
 
         kills++;
         yamlManager.getInstance().setOption("lobbies", lobby + ".killed", kills); //zombieCount
-        if ((int)yamlManager.getInstance().getOption("lobbies", lobby + ".zombieCount") <= kills){
+        if ((int)yamlManager.getInstance().getOption("lobbies", lobby + ".zombieCount") <= kills) {
             int wave = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".wave");
             wave++;
             yamlManager.getInstance().setOption("lobbies", lobby + ".wave", wave);
-            p.showTitle(Title.title(
-                    Component.text("Wave " + wave), Component.text(""),
-                    Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))
-            ));
+            List<Player> players = (List<Player>) yamlManager.getInstance().getOption("lobbies", lobby + ".players");
+            for (Player pl : players){
+                pl.showTitle(Title.title(
+                        Component.text("Wave " + wave), Component.text(""),
+                        Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))
+                ));
+            }
             yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", false);
             yamlManager.getInstance().setOption("lobbies", lobby + ".killed", null);
         }
@@ -305,6 +310,12 @@ public class lobbyManager {
             }
             for (Entity e : spawnLocations.get(0).getWorld().getEntities()) {
                 if (e.getType() == EntityType.ZOMBIE) {
+                    LivingEntity le = (LivingEntity) e;
+                    le.setHealth(0);
+                }
+            }
+            for (Entity e : spawnLocations.get(0).getWorld().getEntities()) {
+                if (e.getType() == EntityType.DROPPED_ITEM) {
                     LivingEntity le = (LivingEntity) e;
                     le.setHealth(0);
                 }

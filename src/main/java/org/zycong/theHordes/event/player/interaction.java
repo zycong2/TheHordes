@@ -5,11 +5,14 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -82,5 +85,14 @@ public class interaction implements Listener {
             }
         }
         p.removeMetadata("GUIinput", TheHordes.getPlugin());
+    }
+
+    @EventHandler
+    void onDamage(EntityDamageByEntityEvent event){
+        if (event.getDamager().getType() == EntityType.ARROW){
+            if (event.getEntityType() == EntityType.PLAYER){
+                event.setCancelled(true);
+            }
+        }
     }
 }

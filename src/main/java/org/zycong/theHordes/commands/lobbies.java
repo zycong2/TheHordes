@@ -94,7 +94,7 @@ public class lobbies implements CommandHandler {
         if (args.length == 1){
             return List.of("create", "delete", "setMap", "spawnPoint", "reset");
         } else if (args.length == 2){
-            if (args[0].equals("delete") || args[0].equals("setMap") || args[0].equals("spawnPoint")){
+            if (args[0].equals("delete") || args[0].equals("setMap") || args[0].equals("spawnPoint") || args[0].equals("reset")){
                 List<String> lobbiesss = new ArrayList<>();
                 for (Object o : yamlManager.getInstance().getNodes("lobbies", "")){
                     if (o instanceof String string){lobbiesss.add(string); }
