@@ -1,5 +1,9 @@
 package org.zycong.theHordes.helpers.Lobby;
 
+import io.lumine.mythic.api.mobs.MythicMob;
+import io.lumine.mythic.bukkit.BukkitAdapter;
+import io.lumine.mythic.bukkit.MythicBukkit;
+import io.lumine.mythic.core.mobs.ActiveMob;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
@@ -104,22 +108,29 @@ public class lobbyManager {
                 }
             }
             Bukkit.getLogger().info("spawneding max " + maxSpawns + " zombies spawnlocations: " + spawnLocations.size());
-            for (int i = 0; i < maxSpawns + 1; i++) {
-                Random rand = new Random();
-                Entity entity = spawnLocations.get(0).getWorld().spawnEntity(spawnLocations.get(rand.nextInt(spawnLocations.size())), EntityType.ZOMBIE);
-                entity.setCustomNameVisible(false);
-                entity.setCustomName("zombie lvl " + waves);
-                Zombie zomb = (Zombie) entity;
-                zomb.setAdult();
-                LivingEntity le = (LivingEntity) entity;
-                le.setMaxHealth(20 + waves);
-                le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue() + difficulty);
-                le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getValue() + difficulty*0.005);
 
+            Random randa = new Random();
+            MythicMob mob = MythicBukkit.inst().getMobManager().getMythicMob(TheHordes.bosses.get(randa.nextInt(TheHordes.bosses.size()))).orElse(null);
+            if ((double) (waves / 10) % 1 ==0 && !TheHordes.bosses.isEmpty() && mob != null){ // spawn boss
+                Random rand2 = new Random(); //
+                Location loc = spawnLocations.get(rand2.nextInt(spawnLocations.size()));
+                ActiveMob knight = mob.spawn(BukkitAdapter.adapt(loc), 1);
+            } else {
+                for (int i = 0; i < maxSpawns + 1; i++) {
+                    Random rand = new Random();
+                    Random rand2 = new Random();
+                    Entity entity = spawnLocations.get(0).getWorld().spawnEntity(spawnLocations.get(rand.nextInt(spawnLocations.size())), TheHordes.entities.get(rand2.nextInt(TheHordes.entities.size())));
+                    entity.setCustomNameVisible(false);
+                    entity.setCustomName(entity.getType().name() + " lvl " + waves);
 
+                    LivingEntity le = (LivingEntity) entity;
+                    le.setMaxHealth(20 + waves);
+                    le.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(le.getAttribute(Attribute.ATTACK_DAMAGE).getValue() + difficulty);
+                    le.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(le.getAttribute(Attribute.MOVEMENT_SPEED).getValue() + difficulty * 0.005);
+                }
+                yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns -1);
             }
             yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", true);
-            yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns -1);
         } catch (NullPointerException exeption) {
             games.remove(l);
         }
@@ -315,7 +326,7 @@ public class lobbyManager {
                 }
             }
             for (Entity e : spawnLocations.get(0).getWorld().getEntities()) {
-                if (e.getType() == EntityType.DROPPED_ITEM) {
+                if (e.getType() == EntityType.ITEM) {
                     LivingEntity le = (LivingEntity) e;
                     le.setHealth(0);
                 }

@@ -7,6 +7,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import org.zycong.theHordes.TheHordes;
 import org.zycong.theHordes.commands.kits;
+import org.zycong.theHordes.commands.waveSpawns;
 
 public class openClose implements Listener {
     @EventHandler
@@ -17,6 +18,9 @@ public class openClose implements Listener {
             switch(inventory){
                 case "kitEditor" : {
                     kits.InventoryClose(event);
+                    break;
+                } case "entityEditor": {
+                    waveSpawns.onEntityClose(event);
                     break;
                 }
             }

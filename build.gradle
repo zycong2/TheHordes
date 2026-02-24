@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    id 'com.github.johnrengelman.shadow' version '8.1.1' // Added for fat jar
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'org.zycong'
@@ -20,79 +20,64 @@ repositories {
     maven {
         url = 'https://repo.extendedclip.com/releases/'
     }
+    maven { url 'https://mvn.lumine.io/repository/maven-public/' }
+
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("org.projectlombok:lombok:1.18.30")
     compileOnly("net.luckperms:api:5.4")
+    compileOnly("io.lumine:Mythic-Dist:5.6.1")
 
     implementation("net.kyori:adventure-text-minimessage:4.19.0")
     implementation("io.github.classgraph:classgraph:4.8.149")
 
-    // Reflections and required runtime dependencies
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'net.bytebuddy:byte-buddy:1.14.9'
     implementation 'org.javassist:javassist:3.29.2-GA'
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 22
+
 java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
+    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release.set(targetJavaVersion)
+    options.release.set(targetJavaVersion)
+}
+
+// Ensure shadow jar has no classifier
+tasks.shadowJar {
+    archiveClassifier.set("")
+}
+
+tasks.register('copyToServer', Copy) {
+    dependsOn tasks.shadowJar
+
+    from {
+        tasks.shadowJar.archiveFile.get().asFile
     }
+
+    into "/home/kaas/IdeaProjects/TheHordes/run/plugins"
 }
 
-tasks.shadowJar {archiveClassifier.set("")}
-tasks.build {dependsOn(shadowJar)}
-
-processResources {
-    def props = [version: version]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-    filesMatching('paper-plugin.yml') {
-        expand props
-    }
-}
-
-// Configure ShadowJar
-tasks.named("shadowJar") {
-    archiveClassifier.set("") // This makes the output jar just TheHordes-1.0.jar instead of -all
-    // Optionally relocate to avoid conflicts with other plugins
-    // relocate 'org.reflections', 'org.zycong.theHordes.shadow.reflections'
-}
-
+// Make build trigger copy
 tasks.build {
     dependsOn tasks.shadowJar
+    finalizedBy tasks.copyToServer
 }
 
-// Ensure runServer uses shadowJar output if present
+// Start server AFTER build + copy completes
+tasks.register('buildAndRun') {
+    dependsOn tasks.build
+    finalizedBy tasks.runServer
+}
+
+// Paper dev server version
 tasks.runServer {
     minecraftVersion("1.21.4")
 }
-
-/*
-tasks.register('copyToServer', Copy) {
-    dependsOn tasks.named('build')
-
-    def jarTask = tasks.named('jar').get()
-    from jarTask.destinationDirectory
-    include jarTask.archiveFileName.get()
-
-    into 'D:/Users/tonnam/Documents/MAZE/M/M/.Test-Server/plugins'
-}
-
-tasks.named('build') {
-    finalizedBy 'copyToServer'
-}*/

@@ -8,6 +8,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -42,22 +43,31 @@ public final class TheHordes extends JavaPlugin {
 
     public static Map<String, YamlConfiguration> ItemDB = new HashMap<>();
 
-    public static List<LivingEntity> customMobs = new java.util.ArrayList<>(List.of());
-    public static List<String> spawns = new java.util.ArrayList<>(List.of());
-
     public static List<String> DBFolders = List.of("itemDB", "mobDB", "GUI");
     public static Map<String, List<YamlConfiguration>> DBFileConfiguration = new HashMap<>();
+
+    public static List<String> bosses = List.of();
+    public static List<EntityType> entities = new java.util.ArrayList<>(List.of());
 
     public static boolean IsLuckperms = false;
     public static boolean IsPlaceholderAPI = false;
 
     @Override
     public void onEnable() {
+        yamlManager.getInstance().loadData();
         Logger reflectionsLogger = Logger.getLogger("org.reflections");
         reflectionsLogger.setLevel(Level.OFF);
 
-        yamlManager.getInstance().loadData();
         lobbyManager.startTimers();
+
+        if (yamlManager.getInstance().getOption("data", "spawnEntities") != null){
+            entities = (List<EntityType>) yamlManager.getInstance().getOption("data", "spawnEntities");
+        } else{
+            entities = new java.util.ArrayList<>(List.of(EntityType.ZOMBIE));
+        }
+        if (yamlManager.getInstance().getOption("data", "spawnBosses") != null){
+            bosses = (List<String>) yamlManager.getInstance().getOption("data", "spawnBosses");
+        }
 
         if(doesPluginExist("LuckPerms")){IsLuckperms = true;}
         if(doesPluginExist("PlaceholderAPI")){IsPlaceholderAPI = true;
@@ -102,6 +112,8 @@ public final class TheHordes extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        yamlManager.getInstance().setOption("data", "spawnEntities", entities);
+        yamlManager.getInstance().setOption("data", "spawnBosses", bosses);
         lobbyManager.clearLobbies();
         yamlManager.getInstance().saveData();
     }
