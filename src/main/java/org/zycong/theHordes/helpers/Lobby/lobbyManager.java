@@ -115,6 +115,7 @@ public class lobbyManager {
                 Random rand2 = new Random(); //
                 Location loc = spawnLocations.get(rand2.nextInt(spawnLocations.size()));
                 ActiveMob knight = mob.spawn(BukkitAdapter.adapt(loc), 1);
+                yamlManager.getInstance().setOption("lobbies", lobby + ".boss", true);
             } else {
                 for (int i = 0; i < maxSpawns + 1; i++) {
                     Random rand = new Random();
@@ -125,8 +126,8 @@ public class lobbyManager {
 
                     LivingEntity le = (LivingEntity) entity;
                     le.setMaxHealth(20 + waves);
-                    le.getAttribute(Attribute.ATTACK_DAMAGE).setBaseValue(le.getAttribute(Attribute.ATTACK_DAMAGE).getValue() + difficulty);
-                    le.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(le.getAttribute(Attribute.MOVEMENT_SPEED).getValue() + difficulty * 0.005);
+                    le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(le.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue() + difficulty);
+                    le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(le.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getValue() + difficulty * 0.005);
                 }
                 yamlManager.getInstance().setOption("lobbies", lobby + ".zombieCount", maxSpawns -1);
             }
@@ -259,8 +260,13 @@ public class lobbyManager {
         return null;
     }
 
-    public static void zombieKilled(Player p){
+    public static void zombieKilled(Player p,  Boolean isBoss){
         String lobby = getPlayerGame(p);
+        if (isBoss){
+            nextWave(lobby);
+            return;
+        }
+
         int kills = 0;
         if (yamlManager.getInstance().getOption("lobbies", lobby + ".killed") == null){
         }else {
@@ -270,19 +276,23 @@ public class lobbyManager {
         kills++;
         yamlManager.getInstance().setOption("lobbies", lobby + ".killed", kills); //zombieCount
         if ((int)yamlManager.getInstance().getOption("lobbies", lobby + ".zombieCount") <= kills) {
-            int wave = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".wave");
-            wave++;
-            yamlManager.getInstance().setOption("lobbies", lobby + ".wave", wave);
-            List<Player> players = (List<Player>) yamlManager.getInstance().getOption("lobbies", lobby + ".players");
-            for (Player pl : players){
-                pl.showTitle(Title.title(
-                        Component.text("Wave " + wave), Component.text(""),
-                        Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))
-                ));
-            }
-            yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", false);
-            yamlManager.getInstance().setOption("lobbies", lobby + ".killed", null);
+            nextWave(lobby);
         }
+    }
+
+    private static void nextWave(String lobby) {
+        int wave = (int) yamlManager.getInstance().getOption("lobbies", lobby + ".wave");
+        wave++;
+        yamlManager.getInstance().setOption("lobbies", lobby + ".wave", wave);
+        List<Player> players = (List<Player>) yamlManager.getInstance().getOption("lobbies", lobby + ".players");
+        for (Player pl : players){
+            pl.showTitle(Title.title(
+                    Component.text("Wave " + wave), Component.text(""),
+                    Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))
+            ));
+        }
+        yamlManager.getInstance().setOption("lobbies", lobby + ".spawnedAllZombies", false);
+        yamlManager.getInstance().setOption("lobbies", lobby + ".killed", null);
     }
 
     public static void playerAwayFromGame(Player p){
@@ -326,7 +336,7 @@ public class lobbyManager {
                 }
             }
             for (Entity e : spawnLocations.get(0).getWorld().getEntities()) {
-                if (e.getType() == EntityType.ITEM) {
+                if (e.getType() == EntityType.DROPPED_ITEM) {
                     LivingEntity le = (LivingEntity) e;
                     le.setHealth(0);
                 }
